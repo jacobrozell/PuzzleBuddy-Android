@@ -174,9 +174,12 @@ class PuzzleListViewModel @Inject constructor(
             if (duplicate != null) {
                 logger.info(
                     LogCategory.PUZZLES,
-                    eventName = "barcode_scan_duplicate",
-                    message = "Duplicate barcode on quick scan.",
-                    metadata = mapOf("source" to "list_scan"),
+                    eventName = "barcode_scan_completed",
+                    message = "Barcode scan completed.",
+                    metadata = mapOf(
+                        "scan_context" to "list_scan",
+                        "scan_result" to "match",
+                    ),
                 )
                 scanAlert.value = ScanAlert(
                     title = "Already in your collection",
@@ -190,9 +193,12 @@ class PuzzleListViewModel @Inject constructor(
             val metadata = lookup.metadata
             logger.info(
                 LogCategory.PUZZLES,
-                eventName = "barcode_scan_quick_add",
-                message = "Quick add from barcode scan.",
-                metadata = mapOf("source" to "list_scan"),
+                eventName = "barcode_scan_completed",
+                message = "Barcode scan completed.",
+                metadata = mapOf(
+                    "scan_context" to "list_scan",
+                    "scan_result" to "no_match",
+                ),
             )
             onQuickAdd(
                 QuickAddRequest(

@@ -11,6 +11,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleRating
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleTime
+import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAddSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -142,6 +143,11 @@ class PuzzleFormViewModel @Inject constructor(
             repository.upsert(
                 puzzle = state.puzzle.copy(hasImage = state.imageData != null),
                 imageData = state.imageData,
+                addSource = if (initialBarcode != null && puzzleId == null) {
+                    PuzzleAddSource.BARCODE
+                } else {
+                    PuzzleAddSource.MANUAL
+                },
             )
             onSaved()
         }

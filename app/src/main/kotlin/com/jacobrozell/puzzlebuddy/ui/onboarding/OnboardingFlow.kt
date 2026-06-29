@@ -45,7 +45,10 @@ private val pages = listOf(
 )
 
 @Composable
-fun OnboardingFlow(onFinished: () -> Unit) {
+fun OnboardingFlow(
+    onFinished: () -> Unit,
+    onSkipped: () -> Unit = onFinished,
+) {
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
 
@@ -91,7 +94,7 @@ fun OnboardingFlow(onFinished: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (pagerState.currentPage == 0) {
                     OutlinedButton(
-                        onClick = onFinished,
+                        onClick = onSkipped,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Skip")

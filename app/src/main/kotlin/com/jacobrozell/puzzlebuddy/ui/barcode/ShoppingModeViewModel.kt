@@ -32,7 +32,15 @@ class ShoppingModeViewModel @Inject constructor(
                     LogCategory.PUZZLES,
                     eventName = "shopping_scan_match",
                     message = "Duplicate found while shopping.",
-                    metadata = mapOf("source" to "shopping_mode"),
+                )
+                logger.info(
+                    LogCategory.PUZZLES,
+                    eventName = "barcode_scan_completed",
+                    message = "Barcode scan completed.",
+                    metadata = mapOf(
+                        "scan_context" to "shopping",
+                        "scan_result" to "match",
+                    ),
                 )
                 ShoppingScanResult.Match(match)
             } else {
@@ -40,7 +48,15 @@ class ShoppingModeViewModel @Inject constructor(
                     LogCategory.PUZZLES,
                     eventName = "shopping_scan_no_match",
                     message = "No duplicate while shopping.",
-                    metadata = mapOf("source" to "shopping_mode"),
+                )
+                logger.info(
+                    LogCategory.PUZZLES,
+                    eventName = "barcode_scan_completed",
+                    message = "Barcode scan completed.",
+                    metadata = mapOf(
+                        "scan_context" to "shopping",
+                        "scan_result" to "no_match",
+                    ),
                 )
                 ShoppingScanResult.NoMatch(normalized)
             }

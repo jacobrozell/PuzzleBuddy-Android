@@ -77,6 +77,18 @@ class MainActivity : ComponentActivity() {
                         }
                         if (showOnboarding) {
                             OnboardingFlow(
+                                onSkipped = {
+                                    lifecycleScope.launch {
+                                        logger.info(
+                                            LogCategory.APP,
+                                            eventName = "onboarding_skipped",
+                                            message = "Onboarding skipped.",
+                                            metadata = mapOf("page_index" to "0"),
+                                        )
+                                        onboardingStore.markComplete()
+                                        showOnboarding = false
+                                    }
+                                },
                                 onFinished = {
                                     lifecycleScope.launch {
                                         onboardingStore.markComplete()

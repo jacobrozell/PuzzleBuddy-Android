@@ -18,8 +18,8 @@ class ShellViewModel @Inject constructor(
         lastTab = tab
         logger.info(
             LogCategory.UI,
-            eventName = "main_tab_presented",
-            message = "Tab presented.",
+            eventName = "tab_selected",
+            message = "Tab selected.",
             metadata = mapOf("tab" to tab),
         )
     }
