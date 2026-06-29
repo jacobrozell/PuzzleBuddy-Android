@@ -6,6 +6,7 @@ object FirebaseCrashlyticsEventMapping {
         "model_container_load_failed",
         "model_container_reset_failed",
         "demo_data_seed_failed",
+        "model_container_ephemeral_fallback",
     )
 
     private val eventCodes = mapOf(
@@ -13,6 +14,7 @@ object FirebaseCrashlyticsEventMapping {
         "model_container_load_failed" to 2002,
         "model_container_reset_failed" to 2003,
         "demo_data_seed_failed" to 2004,
+        "model_container_ephemeral_fallback" to 2005,
     )
 
     fun nonFatalError(entry: LogEntry, appVersion: String?): Throwable? {
