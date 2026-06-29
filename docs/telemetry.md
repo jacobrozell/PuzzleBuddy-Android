@@ -7,7 +7,7 @@
 **Verify allowlists match iOS:**
 
 ```bash
-~/Desktop/personal/scripts/check-firebase-parity.sh
+~/Desktop/personal/DaRules/scripts/check-firebase-parity.sh
 ```
 
 When changing Analytics, Crashlytics, or `eventName` strings, update **both** repos and re-run the checker.
