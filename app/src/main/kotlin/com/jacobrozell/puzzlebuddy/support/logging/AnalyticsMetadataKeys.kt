@@ -21,7 +21,23 @@ object AnalyticsMetadataKeys {
         "puzzle_status",
         "completion_number",
         "completion_count",
+        "import_policy",
         "format",
+        "add_source",
+        "piece_count_bucket",
+        "has_photo",
+        "photo_count",
+        "status_from",
+        "status_to",
+        "scan_context",
+        "scan_result",
+        "tab",
+        "entry_point",
+        "page_index",
+        "puzzle_type",
+        "difficulty",
+        "rating_bucket",
+        "has_missing_pieces",
     )
 
     val crashlyticsParameters = setOf(

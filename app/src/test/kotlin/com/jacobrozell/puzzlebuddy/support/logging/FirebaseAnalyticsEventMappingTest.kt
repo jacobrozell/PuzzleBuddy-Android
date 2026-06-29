@@ -57,13 +57,28 @@ class FirebaseAnalyticsEventMappingTest {
     }
 
     @Test
+    fun mapsTabSelectedEvent() {
+        val entry = LogEntry(
+            timestamp = Date(),
+            level = LogLevel.INFO,
+            category = LogCategory.UI,
+            eventName = "tab_selected",
+            message = "tab",
+            metadata = mapOf("tab" to "stats"),
+        )
+        val event = FirebaseAnalyticsEventMapping.map(entry, appVersion = "1.0.0")
+        assertEquals("tab_selected", event?.name)
+        assertEquals("stats", event?.parameters?.get("tab"))
+    }
+
+    @Test
     fun ignoresUnmappedEvents() {
         val entry = LogEntry(
             timestamp = Date(),
             level = LogLevel.INFO,
             category = LogCategory.UI,
-            eventName = "main_tab_presented",
-            message = "tab",
+            eventName = "barcode_lookup_succeeded",
+            message = "lookup",
             metadata = emptyMap(),
         )
         assertNull(FirebaseAnalyticsEventMapping.map(entry, appVersion = null))

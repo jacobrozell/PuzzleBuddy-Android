@@ -9,6 +9,7 @@ object FirebaseAnalyticsEventMapping {
     private val allowlistedEvents = setOf(
         "app_bootstrap_ready",
         "onboarding_completed",
+        "onboarding_skipped",
         "puzzle_list_refreshed",
         "puzzle_added",
         "puzzle_updated",
@@ -18,9 +19,15 @@ object FirebaseAnalyticsEventMapping {
         "puzzle_load_failed",
         "puzzle_redo_started",
         "puzzle_completion_recorded",
+        "puzzle_status_changed",
         "settings_collection_exported",
         "shopping_scan_match",
         "shopping_scan_no_match",
+        "barcode_scan_completed",
+        "tab_selected",
+        "pick_next_puzzle_selected",
+        "demo_data_loaded",
+        "demo_data_removed",
     )
 
     private val firebaseNameOverrides = mapOf(
