@@ -1,0 +1,53 @@
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Gradle
+.gradle/
+build/
+**/build/
+local.properties
+
+# Kotlin / Java
+.kotlin/
+*.class
+*.jar
+*.war
+*.hprof
+
+# Native / NDK
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Packaged apps (local builds)
+*.apk
+*.aab
+output/
+
+# Emulator captures (local QA)
+.emulator-screenshots/
+
+# Firebase — never commit; download from Firebase Console
+google-services.json
+**/google-services.json
+!google-services.json.example
+!**/google-services.json.example
+
+# Release signing (keystore stays outside repo)
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# OS / editor
+.DS_Store
+
+# Local Cursor MCP (machine-specific)
+.cursor/mcp.json
