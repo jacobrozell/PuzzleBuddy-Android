@@ -11,8 +11,11 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleDuplicateChecker
 import com.jacobrozell.puzzlebuddy.domain.importing.IPDbCSVImporter
 import com.jacobrozell.puzzlebuddy.domain.importing.PuzzleImportSummary
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
+import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAddSource
+import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAnalyticsMetadata
 import com.jacobrozell.puzzlebuddy.support.logging.info
 import com.jacobrozell.puzzlebuddy.support.logging.warning
 import kotlinx.coroutines.flow.Flow
@@ -57,30 +60,69 @@ class PuzzleRepository @Inject constructor(
     suspend fun findById(id: String): Puzzle? =
         puzzleDao.findById(id)?.toDomain()
 
-    suspend fun upsert(puzzle: Puzzle, imageData: ByteArray? = null) {
+    suspend fun upsert(
+        puzzle: Puzzle,
+        imageData: ByteArray? = null,
+        addSource: PuzzleAddSource? = null,
+    ) {
         val existing = puzzleDao.findById(puzzle.id)
         val isNew = existing == null
+        val previousStatus = existing?.toDomain()?.status
         val image = when {
             imageData != null -> imageData
             else -> existing?.imageData
         }
-        puzzleDao.upsert(puzzle.sanitized().toEntity(image))
+        val sanitized = puzzle.sanitized().copy(hasImage = image != null)
+        puzzleDao.upsert(sanitized.toEntity(image))
         if (image != null) {
             imageCache.put(puzzle.id, image)
         } else {
             imageCache.remove(puzzle.id)
         }
-        logger.info(
-            LogCategory.PUZZLES,
-            eventName = if (isNew) "puzzle_added" else "puzzle_updated",
-            message = if (isNew) "Puzzle added." else "Puzzle updated.",
-            metadata = mapOf(
-                "puzzle_status" to puzzle.status.raw,
-                "puzzle_count" to allPuzzles().size.toString(),
-            ),
-        )
-        if (puzzle.barcode != null) {
-            barcodeMetadataCache.storeFromPuzzle(puzzle.sanitized())
+
+        if (isNew) {
+            logger.info(
+                LogCategory.PUZZLES,
+                eventName = "puzzle_added",
+                message = "Puzzle added.",
+                metadata = PuzzleAnalyticsMetadata.metadata(
+                    puzzle = sanitized,
+                    addSource = addSource ?: PuzzleAddSource.MANUAL,
+                ),
+            )
+        } else {
+            logger.info(
+                LogCategory.PUZZLES,
+                eventName = "puzzle_updated",
+                message = "Puzzle updated.",
+                metadata = PuzzleAnalyticsMetadata.metadata(puzzle = sanitized),
+            )
+            if (previousStatus != null && previousStatus != sanitized.status) {
+                logger.info(
+                    LogCategory.PUZZLES,
+                    eventName = "puzzle_status_changed",
+                    message = "Puzzle status changed.",
+                    metadata = PuzzleAnalyticsMetadata.statusChangedMetadata(
+                        from = previousStatus,
+                        to = sanitized.status,
+                        pieces = sanitized.pieces,
+                    ),
+                )
+                if (previousStatus != PuzzleStatus.COMPLETED && sanitized.status == PuzzleStatus.COMPLETED) {
+                    logger.info(
+                        LogCategory.PUZZLES,
+                        eventName = "puzzle_completion_recorded",
+                        message = "Recorded puzzle completion.",
+                        metadata = PuzzleAnalyticsMetadata.completionMetadata(
+                            puzzle = sanitized,
+                            completionNumber = 1,
+                        ),
+                    )
+                }
+            }
+        }
+        if (sanitized.barcode != null) {
+            barcodeMetadataCache.storeFromPuzzle(sanitized)
         }
     }
 
@@ -117,12 +159,13 @@ class PuzzleRepository @Inject constructor(
     suspend fun loadDemoPuzzles() {
         try {
             for (puzzle in DemoDataCatalog.makePuzzles()) {
-                upsert(puzzle)
+                upsert(puzzle, addSource = PuzzleAddSource.DEMO)
             }
             logger.info(
                 LogCategory.PUZZLES,
                 eventName = "demo_data_loaded",
                 message = "Demo puzzles loaded.",
+                metadata = mapOf("puzzle_count" to demoCount().toString()),
             )
         } catch (error: Exception) {
             logger.warning(
@@ -162,7 +205,7 @@ class PuzzleRepository @Inject constructor(
                 summary.skippedDuplicates++
                 continue
             }
-            upsert(candidate)
+            upsert(candidate, addSource = PuzzleAddSource.IMPORT)
             summary.imported++
         }
         return summary
