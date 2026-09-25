@@ -38,6 +38,15 @@ object AnalyticsMetadataKeys {
         "difficulty",
         "rating_bucket",
         "has_missing_pieces",
+        "count_wishlist",
+        "count_todo",
+        "count_in_progress",
+        "count_completed",
+        "count_abandoned",
+        "collection_size_bucket",
+        "completed_count_bucket",
+        "days_since_last_open_bucket",
+        "milestone_id",
     )
 
     val crashlyticsParameters = setOf(

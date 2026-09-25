@@ -2,10 +2,10 @@
 
 > **Dashboard:** [`STATUS.md`](STATUS.md)
 
-**Target:** Puzzle Buddy **1.0.0** local-first lean on Android  
-**iOS baseline:** `Puzzle-Buddy/main`  
+**Target:** Puzzle Buddy **1.0.0** local-first lean on Android (`release/1.0.0`)  
+**iOS baseline:** `PuzzleBuddy/release/1.1.0` allowlists (product 1.1 **not** ported)  
 **Android path:** `PuzzleBuddy-Android/`  
-**Last updated:** 2026-06-23
+**Last updated:** 2026-09-25
 
 ## Legend
 
@@ -38,7 +38,7 @@
 | Collection export (JSON/CSV share) | ✅ |
 | Barcode field on puzzle form | ✅ |
 | UPC barcode lookup (UPCitemdb + local cache) | ✅ |
-| Firebase Analytics + Crashlytics breadcrumbs | ✅ |
+| Firebase Analytics + Crashlytics breadcrumbs | ✅ (1.1 allowlist + session/milestone helpers) |
 | Design tokens / brand background | 🟡 |
 | Login / cloud sync | 🚫 (iOS 1.0 off) |
 | WCAG TalkBack full audit | 🟡 (labels on key controls) |
@@ -109,6 +109,9 @@
 | Feature | Notes |
 |---------|-------|
 | iOS DesignTokens pixel match | Brand background simplified |
+| On loan / Friends | iOS 1.1; Android model+UI not started |
+| Completion history edit / undo / What's New | iOS 1.1; events allowlisted only |
+| Wishlist / Abandoned statuses | iOS 1.0+; snapshot params send `0` |
 
 ---
 
@@ -120,3 +123,4 @@
 | 2026-06-23 | Photos, tags, progress, settings, IPDb import, splash — emulator verified |
 | 2026-06-23 | Barcode scan, shopping mode, export share — ~90% parity |
 | 2026-06-23 | Tablet: navigation rail, two-pane detail/form, stats grid, adaptive list |
+| 2026-09-25 | 1.1 Analytics allowlist + session snapshot / milestones / user properties; product 1.1 deferred |

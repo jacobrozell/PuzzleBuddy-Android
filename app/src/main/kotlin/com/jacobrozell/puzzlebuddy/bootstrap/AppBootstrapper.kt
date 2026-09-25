@@ -2,6 +2,8 @@ package com.jacobrozell.puzzlebuddy.bootstrap
 
 import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsSessionContext
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.info
@@ -13,12 +15,16 @@ class AppBootstrapper @Inject constructor(
     private val logger: AppLogger,
     private val repository: PuzzleRepository,
     private val barcodeMetadataCache: BarcodeMetadataCache,
+    private val sessionContext: AnalyticsSessionContext,
+    private val userContext: AnalyticsUserContext,
 ) {
     private var didLogReady = false
 
     suspend fun onLaunch() {
         if (didLogReady) return
         didLogReady = true
+        sessionContext.beginSession()
+        userContext.syncOnboardingComplete()
         val puzzles = repository.allPuzzles()
         barcodeMetadataCache.warmCache(puzzles)
         logger.info(

@@ -10,8 +10,10 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListQuery
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListSortOption
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListStatusFilter
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsSessionContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
+import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAnalyticsMetadata
 import com.jacobrozell.puzzlebuddy.support.logging.info
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +46,7 @@ class PuzzleListViewModel @Inject constructor(
     val repository: PuzzleRepository,
     private val logger: AppLogger,
     private val barcodeLookupService: BarcodeLookupService,
+    private val sessionContext: AnalyticsSessionContext,
 ) : ViewModel() {
     private var didLogListRefresh = false
     private val statusFilter = MutableStateFlow(PuzzleListStatusFilter.ALL)
@@ -120,8 +123,9 @@ class PuzzleListViewModel @Inject constructor(
                         LogCategory.PUZZLES,
                         eventName = "puzzle_list_refreshed",
                         message = "Puzzle list loaded.",
-                        metadata = mapOf("puzzle_count" to puzzles.size.toString()),
+                        metadata = PuzzleAnalyticsMetadata.collectionSnapshotMetadata(puzzles),
                     )
+                    sessionContext.logSnapshotIfNeeded(puzzles)
                 }
             }
         }

@@ -12,6 +12,8 @@ import com.jacobrozell.puzzlebuddy.domain.importing.IPDbCSVImporter
 import com.jacobrozell.puzzlebuddy.domain.importing.PuzzleImportSummary
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsMilestones
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAddSource
@@ -30,6 +32,8 @@ class PuzzleRepository @Inject constructor(
     private val puzzleDao: PuzzleDao,
     private val logger: AppLogger,
     private val barcodeMetadataCache: BarcodeMetadataCache,
+    private val analyticsMilestones: AnalyticsMilestones,
+    private val analyticsUserContext: AnalyticsUserContext,
 ) {
     private val imageCache = LruCache<String, ByteArray>(32)
 
@@ -124,6 +128,7 @@ class PuzzleRepository @Inject constructor(
         if (sanitized.barcode != null) {
             barcodeMetadataCache.storeFromPuzzle(sanitized)
         }
+        syncCollectionAnalytics()
     }
 
     suspend fun delete(id: String) {
@@ -135,6 +140,7 @@ class PuzzleRepository @Inject constructor(
             message = "Puzzle deleted.",
             metadata = mapOf("puzzle_count" to allPuzzles().size.toString()),
         )
+        syncCollectionAnalytics()
     }
 
     suspend fun imageDataFor(id: String): ByteArray? {
@@ -152,6 +158,7 @@ class PuzzleRepository @Inject constructor(
             eventName = "puzzle_collection_cleared",
             message = "Collection cleared.",
         )
+        syncCollectionAnalytics()
     }
 
     suspend fun demoCount(): Int = puzzleDao.countDemo()
@@ -184,6 +191,7 @@ class PuzzleRepository @Inject constructor(
             eventName = "demo_data_removed",
             message = "Demo puzzles removed.",
         )
+        syncCollectionAnalytics()
     }
 
     suspend fun importPuzzles(incoming: List<Puzzle>): PuzzleImportSummary {
@@ -214,6 +222,15 @@ class PuzzleRepository @Inject constructor(
     suspend fun importIpdbCsv(data: ByteArray): PuzzleImportSummary {
         val puzzles = IPDbCSVImporter.puzzlesFrom(data)
         return importPuzzles(puzzles)
+    }
+
+    private suspend fun syncCollectionAnalytics() {
+        val puzzles = allPuzzles()
+        analyticsMilestones.logCollectionSizeMilestones(puzzles.size)
+        analyticsMilestones.logCompletionMilestones(
+            puzzles.count { it.status == PuzzleStatus.COMPLETED },
+        )
+        analyticsUserContext.syncCollection(puzzles)
     }
 
     suspend fun findByBarcode(barcode: String): Puzzle? {

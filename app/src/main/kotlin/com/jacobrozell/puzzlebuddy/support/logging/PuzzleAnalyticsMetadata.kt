@@ -76,4 +76,64 @@ object PuzzleAnalyticsMetadata {
         "status_to" to to.raw,
         "piece_count_bucket" to pieceCountBucket(pieces),
     )
+
+    /** Coarse collection size for user properties and session snapshots (not exact counts). */
+    fun collectionSizeBucket(count: Int): String = when (maxOf(0, count)) {
+        0 -> "0"
+        1 -> "1"
+        in 2..5 -> "2_5"
+        in 6..20 -> "6_20"
+        in 21..50 -> "21_50"
+        else -> "51_plus"
+    }
+
+    fun completedCountBucket(count: Int): String = when (maxOf(0, count)) {
+        0 -> "0"
+        1 -> "1"
+        in 2..5 -> "2_5"
+        else -> "6_plus"
+    }
+
+    /** `null` means no prior open recorded (true first session for analytics). */
+    fun daysSinceLastOpenBucket(days: Int?): String {
+        val value = days ?: return "first_open"
+        return when (maxOf(0, value)) {
+            0 -> "0"
+            1 -> "1"
+            in 2..7 -> "2_7"
+            in 8..30 -> "8_30"
+            else -> "31_plus"
+        }
+    }
+
+    fun collectionSnapshotMetadata(puzzles: List<Puzzle>): Map<String, String> {
+        val todo = puzzles.count { it.status == PuzzleStatus.TODO }
+        val inProgress = puzzles.count { it.status == PuzzleStatus.IN_PROGRESS }
+        val completed = puzzles.count { it.status == PuzzleStatus.COMPLETED }
+        return mapOf(
+            "puzzle_count" to puzzles.size.toString(),
+            "count_wishlist" to "0",
+            "count_todo" to todo.toString(),
+            "count_in_progress" to inProgress.toString(),
+            "count_completed" to completed.toString(),
+            "count_abandoned" to "0",
+            "collection_size_bucket" to collectionSizeBucket(puzzles.size),
+            "completed_count_bucket" to completedCountBucket(completed),
+        )
+    }
+
+    fun userPropertyValues(
+        puzzles: List<Puzzle>,
+        onboardingComplete: Boolean,
+    ): Map<String, String> {
+        val completed = puzzles.count { it.status == PuzzleStatus.COMPLETED }
+        return mapOf(
+            "collection_size_bucket" to collectionSizeBucket(puzzles.size),
+            "completed_count_bucket" to completedCountBucket(completed),
+            "has_completed_puzzle" to boolString(completed > 0),
+            "onboarding_complete" to boolString(onboardingComplete),
+        )
+    }
+
+    fun boolString(value: Boolean): String = if (value) "true" else "false"
 }

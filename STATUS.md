@@ -1,18 +1,19 @@
 # Android port status
 
 > **Parity tracker:** [`PARITY.md`](PARITY.md)  
-> **Last updated:** 2026-06-23
+> **Last updated:** 2026-09-25
 
 ## Summary
 
 | Field | Value |
 |-------|-------|
-| **Completion (lean 1.0 intent)** | ~95% |
+| **Completion (lean 1.0 intent)** | ~95% product · **1.1 Analytics allowlist synced** |
 | **Version** | 1.0.0 (1) |
 | **applicationId** | `com.jacobrozell.puzzlebuddy` |
 | **minSdk / targetSdk** | 28 / 36 |
 | **Stack** | Kotlin · Compose · Hilt · Room · DataStore · CameraX · ML Kit · Firebase |
-| **iOS baseline** | `Puzzle-Buddy/main` · local-first 1.0.0 |
+| **Active branch** | `release/1.0.0` (first Play ship would be 1.0.0) |
+| **iOS baseline** | `PuzzleBuddy/release/1.1.0` allowlists · **not shipping Android soon** |
 
 ## Verification
 
@@ -34,5 +35,6 @@ Uses the shared **`puzzle-buddy`** Firebase project (same as iOS).
 
 ## Top remaining gaps
 
-1. UI visual polish pass (match iOS `DesignTokens` exactly)
-2. Full WCAG TalkBack audit
+1. iOS 1.1 product: On loan, completion-history edit/undo, What's New (deferred — not releasing soon)
+2. UI visual polish pass (match iOS `DesignTokens` exactly)
+3. Full WCAG TalkBack audit

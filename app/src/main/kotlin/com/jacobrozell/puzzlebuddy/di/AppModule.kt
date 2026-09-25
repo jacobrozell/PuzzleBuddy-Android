@@ -6,8 +6,10 @@ import com.jacobrozell.puzzlebuddy.data.local.PuzzleBuddyDatabase
 import com.jacobrozell.puzzlebuddy.data.local.PuzzleBuddyDatabaseFactory
 import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzleDao
 import com.jacobrozell.puzzlebuddy.support.FirebaseBootstrap
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsKeyValueStore
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.DefaultAppLogger
+import com.jacobrozell.puzzlebuddy.support.logging.SharedPreferencesAnalyticsStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,4 +42,10 @@ object AppModule {
     @Singleton
     fun provideAppLogger(firebaseBootstrap: FirebaseBootstrap): AppLogger =
         DefaultAppLogger.create(firebaseBootstrap, BuildConfig.VERSION_NAME)
+
+    @Provides
+    @Singleton
+    fun provideAnalyticsKeyValueStore(
+        @ApplicationContext context: Context,
+    ): AnalyticsKeyValueStore = SharedPreferencesAnalyticsStore(context)
 }

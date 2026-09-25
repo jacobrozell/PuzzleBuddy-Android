@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.jacobrozell.puzzlebuddy.bootstrap.AppBootstrapper
 import com.jacobrozell.puzzlebuddy.data.prefs.AppPreferencesStore
 import com.jacobrozell.puzzlebuddy.data.prefs.OnboardingStore
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.info
@@ -37,6 +38,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
     @Inject lateinit var appBootstrapper: AppBootstrapper
     @Inject lateinit var logger: AppLogger
+    @Inject lateinit var userContext: AnalyticsUserContext
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,12 +88,14 @@ class MainActivity : ComponentActivity() {
                                             metadata = mapOf("page_index" to "0"),
                                         )
                                         onboardingStore.markComplete()
+                                        userContext.syncOnboardingComplete(true)
                                         showOnboarding = false
                                     }
                                 },
                                 onFinished = {
                                     lifecycleScope.launch {
                                         onboardingStore.markComplete()
+                                        userContext.syncOnboardingComplete(true)
                                         showOnboarding = false
                                         logger.info(
                                             LogCategory.APP,

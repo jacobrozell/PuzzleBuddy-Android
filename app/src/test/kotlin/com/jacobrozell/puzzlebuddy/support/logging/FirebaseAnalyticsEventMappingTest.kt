@@ -72,6 +72,62 @@ class FirebaseAnalyticsEventMappingTest {
     }
 
     @Test
+    fun mapsSessionSnapshotAndMilestone() {
+        val snapshot = FirebaseAnalyticsEventMapping.map(
+            LogEntry(
+                timestamp = Date(),
+                level = LogLevel.INFO,
+                category = LogCategory.APP,
+                eventName = "session_snapshot",
+                message = "snapshot",
+                metadata = mapOf(
+                    "collection_size_bucket" to "6_20",
+                    "days_since_last_open_bucket" to "2_7",
+                ),
+            ),
+            appVersion = "1.1.0",
+        )
+        assertEquals("session_snapshot", snapshot?.name)
+        assertEquals("6_20", snapshot?.parameters?.get("collection_size_bucket"))
+
+        val milestone = FirebaseAnalyticsEventMapping.map(
+            LogEntry(
+                timestamp = Date(),
+                level = LogLevel.INFO,
+                category = LogCategory.APP,
+                eventName = "milestone_reached",
+                message = "milestone",
+                metadata = mapOf("milestone_id" to "first_puzzle"),
+            ),
+            appVersion = "1.1.0",
+        )
+        assertEquals("milestone_reached", milestone?.name)
+        assertEquals("first_puzzle", milestone?.parameters?.get("milestone_id"))
+    }
+
+    @Test
+    fun mapsDeferredIosElevenEvents() {
+        listOf(
+            "puzzle_completion_undone",
+            "whats_new_shown",
+            "whats_new_dismissed",
+        ).forEach { eventName ->
+            val event = FirebaseAnalyticsEventMapping.map(
+                LogEntry(
+                    timestamp = Date(),
+                    level = LogLevel.INFO,
+                    category = LogCategory.APP,
+                    eventName = eventName,
+                    message = eventName,
+                    metadata = emptyMap(),
+                ),
+                appVersion = "1.1.0",
+            )
+            assertEquals(eventName, event?.name)
+        }
+    }
+
+    @Test
     fun ignoresUnmappedEvents() {
         val entry = LogEntry(
             timestamp = Date(),
