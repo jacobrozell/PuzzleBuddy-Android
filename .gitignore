@@ -40,6 +40,13 @@ google-services.json
 !google-services.json.example
 !**/google-services.json.example
 
+# GA4 / GCP service-account keys (never commit — keep under ~/.config/ga4/ only)
+*-ga4-reader.json
+*ga4*credentials*.json
+*-firebase-adminsdk*.json
+**/service-account*.json
+!**/service-account*.example.json
+
 # Release signing (keystore stays outside repo)
 *.jks
 *.keystore
