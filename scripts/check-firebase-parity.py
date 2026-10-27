@@ -152,6 +152,7 @@ def resolve_pair(root: Path, spec: AppPairSpec) -> AppPair:
         (
             "Dart-Buddy/Support/Logging/FirebaseAnalyticsEventMapping.swift",
             "PuzzleBuddy/App/Util/AppLogging.swift",
+            "App/Util/AppLogging.swift",
             "Puzzle-Buddy/Puzzle Buddy/Util/AppLogging.swift",
             "Puzzle Buddy/Util/AppLogging.swift",
             "Support/Logging/FirebaseAnalyticsEventMapping.swift",
@@ -165,6 +166,7 @@ def resolve_pair(root: Path, spec: AppPairSpec) -> AppPair:
         (
             "Dart-Buddy/Support/Logging/FirebaseCrashlyticsEventMapping.swift",
             "PuzzleBuddy/App/Util/FirebaseCrashlyticsEventMapping.swift",
+            "App/Util/FirebaseCrashlyticsEventMapping.swift",
             "Puzzle-Buddy/Puzzle Buddy/Util/FirebaseCrashlyticsEventMapping.swift",
             "Puzzle Buddy/Util/FirebaseCrashlyticsEventMapping.swift",
             "Support/Logging/FirebaseCrashlyticsEventMapping.swift",
