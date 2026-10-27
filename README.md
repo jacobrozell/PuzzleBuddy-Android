@@ -90,13 +90,13 @@ Unit tests cover store logic, migrations, and domain helpers.
 | [`specs/README.md`](specs/README.md) | Two-layer spec index |
 | [`docs/agent-android-conversion-checklist.md`](docs/agent-android-conversion-checklist.md) | Conversion progress log |
 
-## Cursor ↔ Android Studio (MCP)
+## Verify
 
-Connect Cursor chat to Android Studio via the [JetBrains MCP Server plugin](https://plugins.jetbrains.com/plugin/26071-mcp-server). Use **`build_project`** with `projectPath` set to this repo root to validate edits.
+UI changes use the `android-verify` skill. Package id and test commands are in [`AGENTS.md`](AGENTS.md).
 
 ---
 
 ## iOS reference
 
-iOS source: sibling `../Puzzle-Buddy/` on `main` @ 1.0.0 lean local surface.  
-Behavior specs: `Puzzle-Buddy/specs/` and `Puzzle-Buddy/docs/features.md`.
+iOS source: sibling `../PuzzleBuddy/` on `main` @ 1.0.0 lean local surface.  
+Behavior specs: `PuzzleBuddy/specs/` and `PuzzleBuddy/docs/features.md`.
