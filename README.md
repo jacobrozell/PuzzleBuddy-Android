@@ -9,17 +9,19 @@ Native Android port of [Puzzle Buddy](https://github.com/jacobrozell/Puzzle-Budd
 
 ---
 
-## Status (2026-06-23)
+## Status (2026-10-28)
 
-**~95% parity** with iOS 1.0 lean intent. End-to-end: puzzle CRUD, photo attach (CameraX), star rating, difficulty, status tabs, settings, Firebase Analytics/Crashlytics gating.
+**Parked.** Lean 1.0 is about 95% of the iOS 1.0 catalog: puzzle CRUD, photo attach (CameraX), star rating, difficulty, status tabs, settings. Firebase Analytics and Crashlytics turn on when `google-services.json` is real.
 
-**Not yet:** full WCAG TalkBack audit, pixel-perfect design-token match with iOS.
+The Analytics allowlist matches iOS `release/1.1.0`, including the iOS 1.2 timer event names. Android does not ship the timer, On loan, completion-history edit/undo, or What's New.
+
+**Not shipping soon.** Still open: visual polish against iOS tokens, a TalkBack audit, and the Play Store pipeline. Detail: [`STATUS.md`](STATUS.md).
 
 ```bash
 ./gradlew assembleDebug test   # passing
 ```
 
-**iOS repo:** [jacobrozell/Puzzle-Buddy](https://github.com/jacobrozell/Puzzle-Buddy) · Behavior specs: `../Puzzle-Buddy/specs/`
+**iOS repo:** [jacobrozell/Puzzle-Buddy](https://github.com/jacobrozell/Puzzle-Buddy) on `release/1.1.0` · Behavior specs: `../PuzzleBuddy/specs/`
 
 ---
 
@@ -75,9 +77,10 @@ Unit tests cover store logic, migrations, and domain helpers.
 
 ## Remaining (see PARITY.md)
 
-1. UI visual polish pass (match iOS `DesignTokens` exactly)
-2. Full WCAG TalkBack audit
-3. Play Store release pipeline
+1. iOS 1.1 product (On loan, completion history, What's New) — deferred
+2. UI visual polish pass (match iOS `DesignTokens` exactly)
+3. Full WCAG TalkBack audit
+4. Play Store release pipeline
 
 ---
 
@@ -98,5 +101,5 @@ UI changes use the `android-verify` skill. Package id and test commands are in [
 
 ## iOS reference
 
-iOS source: sibling `../PuzzleBuddy/` on `main` @ 1.0.0 lean local surface.  
+iOS source: sibling `../PuzzleBuddy/` on `release/1.1.0` (1.1.0 Connect prep). Android stays on the 1.0 catalog.  
 Behavior specs: `PuzzleBuddy/specs/` and `PuzzleBuddy/docs/features.md`.
