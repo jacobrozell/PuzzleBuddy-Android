@@ -47,6 +47,8 @@ object AnalyticsMetadataKeys {
         "completed_count_bucket",
         "days_since_last_open_bucket",
         "milestone_id",
+        "reason",
+        "duration_bucket",
     )
 
     val crashlyticsParameters = setOf(

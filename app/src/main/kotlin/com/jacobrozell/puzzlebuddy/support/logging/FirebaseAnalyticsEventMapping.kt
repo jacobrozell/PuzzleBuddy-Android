@@ -22,6 +22,8 @@ object FirebaseAnalyticsEventMapping {
         "puzzle_completion_deleted",
         "puzzle_completion_updated",
         "puzzle_completion_undone",
+        "puzzle_timer_started",
+        "puzzle_timer_paused",
         "whats_new_shown",
         "whats_new_dismissed",
         "settings_collection_exported",
