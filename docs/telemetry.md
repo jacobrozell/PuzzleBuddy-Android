@@ -14,20 +14,27 @@ When changing Analytics, Crashlytics, or `eventName` strings, update **both** re
 
 ## 1.1.0 depth (allowlist + live call sites)
 
-Android allowlists match iOS 1.1 names (`FirebaseAnalyticsEventMapping`, `AnalyticsMetadataKeys`). This Android branch is **`release/1.0.0`** — first Play ship would be 1.0.0.
+**Last updated:** 2026-10-28
+
+Android allowlists match iOS `1f9845c` (`FirebaseAnalyticsEventMapping`, `AnalyticsMetadataKeys`). Work is on `claude/pensive-knuth-liq0g4`. The app version is still 1.0.0 (1).
 
 **Live on Android today**
 
-| Helper | When |
-|--------|------|
+| Helper or event | When |
+|-----------------|------|
 | `AnalyticsSessionContext` | Cold launch (`AppBootstrapper`) + first list load |
 | `AnalyticsUserContext` | Launch, onboarding complete/skip, collection mutations |
 | `AnalyticsMilestones` | After add / complete / collection change |
+| `count_wishlist` / `count_abandoned` | Real counts from puzzle status |
+| `puzzle_completion_recorded` | Real completion number from `appendCompletion` |
+| `puzzle_completion_deleted` / `updated` / `undone` | Repository methods. No history UI yet. |
+| `puzzle_timer_started` / `puzzle_timer_paused` | Repository timer commands. No timer card yet. |
+| `puzzle_redo_started`, `puzzle_marked_on_loan`, `puzzle_marked_returned` | Repository. Loan UI can mark a loan; redo and return have no buttons yet. |
+| `model_container_load_failed`, `model_container_reset_failed`, `model_container_ephemeral_fallback`, `model_container_store_reset` | Database factory |
 
-`count_wishlist` / `count_abandoned` stay `0` until those statuses exist on Android.
+**Allowlisted, no Android call site yet**
 
-**Allowlisted, no Android UI yet** (iOS-only call sites)
-
-- `puzzle_completion_deleted` / `updated` / `undone`
 - `whats_new_shown` / `whats_new_dismissed`
+- `pick_next_puzzle_selected`
 - `puzzle_backup_restored`
+- `store_review_requested` / `store_review_link_opened` (log-only)

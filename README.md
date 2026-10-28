@@ -1,27 +1,25 @@
 # Puzzle Buddy Android
 
-Native Android port of [Puzzle Buddy](https://github.com/jacobrozell/Puzzle-Buddy) (iOS), following the workspace Android conversion checklist.
+Native Android port of [Puzzle Buddy](https://github.com/jacobrozell/PuzzleBuddy) (iOS), following the workspace Android conversion checklist.
 
 **Application ID:** `com.jacobrozell.puzzlebuddy`  
-**Lean surface:** iOS 1.0.0 local-first catalog (no login/cloud sync)
+**Target:** iOS 1.1.0 local-first catalog (no login/cloud sync)
 
-> **Current state:** [`STATUS.md`](STATUS.md) · **Feature matrix:** [`PARITY.md`](PARITY.md) · **Specs:** [`specs/README.md`](specs/README.md)
+> **Current state:** [`STATUS.md`](STATUS.md) · **Feature matrix:** [`PARITY.md`](PARITY.md) · **Plan:** [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md)
 
 ---
 
 ## Status (2026-10-28)
 
-**Parked.** Lean 1.0 is about 95% of the iOS 1.0 catalog: puzzle CRUD, photo attach (CameraX), star rating, difficulty, status tabs, settings. Firebase Analytics and Crashlytics turn on when `google-services.json` is real.
+**In progress** on `claude/pensive-knuth-liq0g4`. The iOS 1.1 model, Room v2, and repository are in: five statuses, metadata, photo files, completion logs, on loan, the timer commands, and a 13-puzzle demo catalog. The list, form, and detail show those fields. The timer card, history editor, stats rewrite, and the rest of the 1.1 UI are still open. Repo version is still 1.0.0 (1).
 
-The Analytics allowlist matches iOS `release/1.1.0`, including the iOS 1.2 timer event names. Android does not ship the timer, On loan, completion-history edit/undo, or What's New.
-
-**Not shipping soon.** Still open: visual polish against iOS tokens, a TalkBack audit, and the Play Store pipeline. Detail: [`STATUS.md`](STATUS.md).
+Firebase Analytics and Crashlytics turn on when `google-services.json` is real. Detail: [`STATUS.md`](STATUS.md).
 
 ```bash
 ./gradlew assembleDebug test   # passing
 ```
 
-**iOS repo:** [jacobrozell/Puzzle-Buddy](https://github.com/jacobrozell/Puzzle-Buddy) on `release/1.1.0` · Behavior specs: `../PuzzleBuddy/specs/`
+**iOS repo:** [jacobrozell/PuzzleBuddy](https://github.com/jacobrozell/PuzzleBuddy) @ `1f9845c` · Behavior specs: `../PuzzleBuddy/specs/`
 
 ---
 
@@ -60,16 +58,17 @@ Package: `com.jacobrozell.puzzlebuddy` · Implementation specs: [`specs/README.m
 
 ---
 
-## Lean 1.0 scope (Android)
+## Scope (Android)
 
 | Area | Highlights |
 |------|------------|
-| **Catalog** | Add/edit/delete puzzles; piece count, rating, difficulty, status |
-| **Photos** | Camera or gallery attach, compressed storage |
-| **List & detail** | Tabbed browse, swipe delete, detail/edit flows |
-| **Settings** | Legal links, appearance |
+| **Catalog** | Five statuses, metadata, piece count, rating, difficulty, tags |
+| **Photos** | Up to five JPEG files on disk; the form still attaches one |
+| **List & detail** | Status segments, loan and timer badges, detail rows for the new fields |
+| **Collection** | Completions, on loan, and the stopwatch are stored; history and timer UI are next |
+| **Settings** | Appearance, demo data (13 puzzles), legal links. Import/export UI is still here and comes out with the 1.1 settings pass |
 | **Firebase** | Analytics + Crashlytics when real `google-services.json` present |
-| **Offline** | Local-first — no login/cloud in lean 1.0 |
+| **Offline** | Local-first — no login or cloud sync |
 
 Unit tests cover store logic, migrations, and domain helpers.
 
@@ -77,9 +76,9 @@ Unit tests cover store logic, migrations, and domain helpers.
 
 ## Remaining (see PARITY.md)
 
-1. iOS 1.1 product (On loan, completion history, What's New) — deferred
-2. UI visual polish pass (match iOS `DesignTokens` exactly)
-3. Full WCAG TalkBack audit
+1. Timer card, completion history, undo banner, stats, pick next, share collage
+2. What's New, Play review prompt, and removing lookup plus import/export from Settings
+3. UI visual polish and a TalkBack audit
 4. Play Store release pipeline
 
 ---
@@ -101,5 +100,5 @@ UI changes use the `android-verify` skill. Package id and test commands are in [
 
 ## iOS reference
 
-iOS source: sibling `../PuzzleBuddy/` on `release/1.1.0` (1.1.0 Connect prep). Android stays on the 1.0 catalog.  
+iOS source: sibling `../PuzzleBuddy/` at `1f9845c` (`feature/1.2.0-puzzle-timer`, the 1.1.0 build).  
 Behavior specs: `PuzzleBuddy/specs/` and `PuzzleBuddy/docs/features.md`.

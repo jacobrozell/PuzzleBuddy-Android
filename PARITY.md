@@ -1,120 +1,85 @@
 # iOS ↔ Android parity tracker
 
-> **Dashboard:** [`STATUS.md`](STATUS.md)
+> **Dashboard:** [`STATUS.md`](STATUS.md)  
+> **Plan:** [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md)
 
-**Target:** Puzzle Buddy **1.1.0** in progress on `claude/pensive-knuth-liq0g4` (iOS `feature/1.2.0-puzzle-timer` @ `1f9845c`)  
-**iOS baseline:** `PuzzleBuddy` @ `1f9845c`  
-**Android path:** `PuzzleBuddy-Android/`  
+**Target:** iOS 1.1.0 (`feature/1.2.0-puzzle-timer` @ `1f9845c`)  
+**Android branch:** `claude/pensive-knuth-liq0g4`  
+**Repo version:** 1.0.0 (1) — not bumped yet  
 **Last updated:** 2026-10-28
 
 ## Legend
 
 | Status | Meaning |
 |--------|---------|
-| ✅ | Shipped on Android (matches iOS lean intent) |
-| 🟡 | Partial / simplified |
+| ✅ | Matches iOS 1.1 behavior |
+| 🟡 | Model or store is in; UI is partial or missing |
 | ⬜ | Not started |
-| 🚫 | Out of lean 1.0 scope on both platforms |
+| 🚫 | Out of scope, or removed on iOS 1.1 |
 
 ## Summary
 
 | Area | Android |
 |------|---------|
-| 3-tab shell (Puzzles · Stats · Settings) | ✅ |
-| Splash screen | ✅ |
-| Onboarding (4 pages) + replay | ✅ |
-| Local Room persistence | ✅ |
-| Puzzle list (status, search, sort, filters) | ✅ |
-| Add / edit / delete puzzle | ✅ |
-| Photo attach (gallery + camera, JPEG compress) | ✅ |
-| Tags on puzzles | ✅ |
-| Half-star rating picker | ✅ |
-| In-progress progress slider | ✅ |
-| Puzzle detail + pace metrics + photo | ✅ |
-| Collection stats | ✅ |
-| Settings (appearance, demo, import, legal) | ✅ |
-| IPDb CSV import | ✅ |
-| Barcode scan + shopping mode | ✅ |
-| Collection export (JSON/CSV share) | ✅ |
-| Barcode field on puzzle form | ✅ |
-| UPC barcode lookup (UPCitemdb + local cache) | ✅ |
-| Firebase Analytics + Crashlytics breadcrumbs | ✅ (1.1 allowlist + session/milestone helpers) |
-| Design tokens / brand background | 🟡 |
-| Login / cloud sync | 🚫 (iOS 1.0 off) |
-| WCAG TalkBack full audit | 🟡 (labels on key controls) |
-| Tablet / landscape adaptive layout | ✅ |
+| 3-tab shell | ✅ |
+| Five statuses (Wishlist, To-Do, In-Progress, Completed, Abandoned) | 🟡 list segments + form picker |
+| Metadata (dates, price, type, material, shape, cut, disposition) | 🟡 domain, Room, form, and detail |
+| Photos, up to 5, files on disk | 🟡 store keeps 5; UI still attaches one photo |
+| Completion history, redo, undo | 🟡 repository only |
+| On loan + friends | 🟡 form, list badge, detail; no People list (same as iOS) |
+| In-app timer | 🟡 repository commands; list badge only |
+| Pick next | ⬜ |
+| Stats (finishes, year picker, charts, milestones) | 🟡 domain math; screen is still the old ~14 metrics |
+| Share collage | ⬜ |
+| Demo catalog (13 puzzles, covers, Paris on loan, Floral Arch ×2) | 🟡 loader writes them; not emulator-checked |
+| Online barcode lookup (UPCitemdb) | 🚫 removed on iOS 1.1; still in the Android app |
+| Settings import / export | 🚫 removed on iOS 1.1; still in Android Settings |
+| Write a Review + in-app review prompt | ⬜ |
+| What's New | ⬜ |
+| Store-reset and ephemeral banners | 🟡 flag and Crashlytics events; no banner |
+| Delete all data, including borrower names | 🟡 repository; Settings copy still says puzzles |
+| Analytics allowlist | ✅ matches `1f9845c` |
+| Onboarding copy (no lookup, no IPDb) | ⬜ still the old copy |
+| Tablet two-pane layout | ✅ existing Android layout |
 
-**~95% lean 1.0 intent**
+## 1.1 features
 
----
-
-## App shell
-
-| Feature | iOS 1.0 | Android |
+| Feature | iOS 1.1 | Android |
 |---------|---------|---------|
-| Splash + tagline | ✅ | ✅ |
-| Puzzles tab | ✅ | ✅ |
-| Collection Stats tab | ✅ | ✅ |
-| Settings tab | ✅ | ✅ |
-| Teal brand accent | ✅ | ✅ |
-| Brand gradient background | ✅ | 🟡 |
-| Appearance (light/dark/system) | ✅ | ✅ |
-| Login gate | 🚫 off | 🚫 off |
+| Wishlist / Abandoned | ✅ | 🟡 |
+| Start date and date labels | ✅ | 🟡 detail labels |
+| Purchase location, price, year, type, material, shape, cut, dimensions, disposition | ✅ | 🟡 |
+| Multi-photo gallery (cover = first, arrow reorder) | ✅ | 🟡 files + semantics; form is still one photo |
+| Completion history edit / delete | ✅ | 🟡 repository |
+| Undo completion banner | ✅ | 🟡 repository, 5-minute window |
+| Puzzle again (redo) | ✅ | 🟡 `startRedo` |
+| On loan, overdue, Mark returned | ✅ | 🟡 form switch, list badge, detail rows |
+| Friends table | ✅ model only | 🟡 model + Room; list UI stays off |
+| In-app stopwatch | ✅ | 🟡 store; no timer card |
+| Pick next puzzle | ✅ | ⬜ |
+| Stats year picker, monthly chart, on-loan card, milestone banner | ✅ | 🟡 `CollectionStats` math only |
+| Share collage | ✅ | ⬜ |
+| What's New 1.1 | ✅ | ⬜ |
+| Play / App Store review prompt | ✅ | ⬜ |
+| Demo data, 13 puzzles | ✅ | 🟡 |
 
-## Catalog
+## Still the 1.0 shell
 
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Status segments | ✅ | ✅ |
-| Search (name, brand, barcode, tags) | ✅ | ✅ |
-| Sort + filters | ✅ | ✅ |
-| Swipe to delete | ✅ | ✅ |
-| Star rating on list row | ✅ | ✅ |
-| FAB add puzzle | ✅ | ✅ |
-| Barcode scan → quick add + lookup | ✅ | ✅ |
-| Shopping mode (duplicate check) | ✅ | ✅ |
-| Puzzle form (core fields) | ✅ | ✅ |
-| Barcode field + scan on form | ✅ | ✅ |
-| Half-star rating UI | ✅ | ✅ |
-| Photo attachment | ✅ | ✅ |
-| Tags field + suggestions | ✅ | ✅ |
-| Progress percent (in-progress) | ✅ | ✅ |
-| List thumbnails | ✅ | ✅ |
+| Feature | Android |
+|---------|---------|
+| Splash, onboarding, appearance | ✅ |
+| Search, sort, swipe delete, tags, half-star rating | ✅ |
+| Barcode scan + shopping mode | ✅ |
+| Barcode field on the form | ✅ |
+| UPC barcode lookup | 🚫 still present; remove (plan WP3.8) |
+| IPDb CSV import and collection export in Settings | 🚫 still present; remove the UI (plan WP4.9) |
+| Privacy, support, accessibility links | ✅ |
+| Firebase Analytics + Crashlytics breadcrumbs | ✅ |
+| Design tokens / brand background | 🟡 |
+| TalkBack audit | 🟡 |
+| Login / cloud sync | 🚫 off |
 
-## Settings & data
-
-| Feature | iOS | Android |
-|---------|-----|---------|
-| IPDb CSV import | ✅ | ✅ |
-| Export JSON backup | ✅ | ✅ |
-| Export IPDb CSV | ✅ | ✅ |
-| Load / remove demo data | ✅ | ✅ |
-| Delete all puzzles | ✅ | ✅ |
-| Barcode lookup toggle | ✅ | ✅ |
-| Privacy / support / a11y links | ✅ | ✅ |
-| Replay onboarding | ✅ | ✅ |
-
-## Telemetry
-
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Allowlisted Firebase Analytics | ✅ | ✅ |
-| Crashlytics breadcrumbs (INFO+) | ✅ | ✅ |
-| Non-fatal error mapping | ✅ | ✅ |
-| No PII in metadata | ✅ | ✅ |
-| CI-safe placeholder config | ✅ | ✅ (`google-services.json.example`) |
-
-## Deferred (documented)
-
-| Feature | Notes |
-|---------|-------|
-| iOS DesignTokens pixel match | Brand background simplified |
-| On loan / Friends | Model, store, form switch, list badge, and detail rows are in. People list stays off, matching iOS. |
-| Completion history edit / undo / What's New | Repository operations exist. History editor, undo banner, and What's New sheet are not in the UI yet. |
-| Wishlist / Abandoned statuses | Status values, filters, and progress rules are in. Snapshot counts use the real statuses. |
-| In-app timer | Semantics and repository commands exist. The detail timer card is not in the UI yet. "Timer running" shows on the list when a timer is running. |
-
----
+Remove the CI pin in `.github/workflows/ci.yml` (`ref: feature/1.2.0-puzzle-timer`) once iOS merges 1.1.0 into `main`.
 
 ## Session log
 
@@ -125,4 +90,4 @@
 | 2026-06-23 | Barcode scan, shopping mode, export share — ~90% parity |
 | 2026-06-23 | Tablet: navigation rail, two-pane detail/form, stats grid, adaptive list |
 | 2026-09-25 | 1.1 Analytics allowlist + session snapshot / milestones / user properties; product 1.1 deferred |
-| 2026-10-28 | iOS 1.1 domain, Room v2, and repository (photos on disk, completions, friends, timer commands, demo catalog of 13) landed on `claude/pensive-knuth-liq0g4`. List, form, and detail show the new fields. Still open: timer card, completion history UI, undo banner, stats rewrite, share collage, What's New, Play review prompt, remove UPCitemdb and import/export settings, JSON backup parity, emulator QA. |
+| 2026-10-28 | Domain, Room v2, and repository for iOS 1.1 landed on `claude/pensive-knuth-liq0g4`. List, form, and detail show the new fields. Unit tests passed. Emulator QA not done. Open: timer card, history UI, undo banner, stats screen, pick next, share, What's New, review prompt, drop UPCitemdb and import/export UI, JSON backup parity, version 1.1.0 (2). |
