@@ -5,6 +5,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleRating
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleType
 import kotlin.math.floor
 
 enum class PuzzleAddSource(val raw: String) {
@@ -48,7 +49,7 @@ object PuzzleAnalyticsMetadata {
             "puzzle_status" to puzzle.status.raw,
             "piece_count_bucket" to pieceCountBucket(puzzle.pieces),
             "has_photo" to if (puzzle.hasImage) "true" else "false",
-            "photo_count" to if (puzzle.hasImage) "1" else "0",
+            "photo_count" to puzzle.photos.size.coerceAtMost(5).toString(),
         )
         if (addSource != null) {
             values["add_source"] = addSource.raw
@@ -61,7 +62,7 @@ object PuzzleAnalyticsMetadata {
         completionNumber: Int,
     ): Map<String, String> = metadata(puzzle).toMutableMap().apply {
         put("completion_number", completionNumber.toString())
-        put("puzzle_type", "None")
+        put("puzzle_type", if (puzzle.puzzleType == PuzzleType.NONE) "None" else puzzle.puzzleType.raw)
         put("difficulty", puzzle.difficulty.raw)
         put("rating_bucket", ratingBucket(puzzle.rating))
         put("has_missing_pieces", if (puzzle.hasMissingPieces) "true" else "false")
@@ -107,16 +108,18 @@ object PuzzleAnalyticsMetadata {
     }
 
     fun collectionSnapshotMetadata(puzzles: List<Puzzle>): Map<String, String> {
+        val wishlist = puzzles.count { it.status == PuzzleStatus.WISHLIST }
         val todo = puzzles.count { it.status == PuzzleStatus.TODO }
         val inProgress = puzzles.count { it.status == PuzzleStatus.IN_PROGRESS }
         val completed = puzzles.count { it.status == PuzzleStatus.COMPLETED }
+        val abandoned = puzzles.count { it.status == PuzzleStatus.ABANDONED }
         return mapOf(
             "puzzle_count" to puzzles.size.toString(),
-            "count_wishlist" to "0",
+            "count_wishlist" to wishlist.toString(),
             "count_todo" to todo.toString(),
             "count_in_progress" to inProgress.toString(),
             "count_completed" to completed.toString(),
-            "count_abandoned" to "0",
+            "count_abandoned" to abandoned.toString(),
             "collection_size_bucket" to collectionSizeBucket(puzzles.size),
             "completed_count_bucket" to completedCountBucket(completed),
         )

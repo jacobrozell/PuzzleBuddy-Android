@@ -111,10 +111,13 @@ object IPDbCSVImporter {
     }
 
     private fun parseStatus(raw: String?): PuzzleStatus {
-        val value = raw?.lowercase().orEmpty()
+        if (raw == null) return PuzzleStatus.TODO
+        val value = raw.lowercase()
         return when {
             value.contains("complete") || value.contains("finished") || value.contains("done") -> PuzzleStatus.COMPLETED
             value.contains("progress") || value.contains("started") || value.contains("working") -> PuzzleStatus.IN_PROGRESS
+            value.contains("wish") -> PuzzleStatus.WISHLIST
+            value.contains("abandon") || value.contains("quit") || value.contains("stopped") -> PuzzleStatus.ABANDONED
             else -> PuzzleStatus.TODO
         }
     }

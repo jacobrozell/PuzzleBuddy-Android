@@ -12,7 +12,7 @@ object PuzzleProgressSemantics {
     }
 
     fun progressFor(status: PuzzleStatus, current: Int): Int = when (status) {
-        PuzzleStatus.TODO -> 0
+        PuzzleStatus.WISHLIST, PuzzleStatus.TODO, PuzzleStatus.ABANDONED -> 0
         PuzzleStatus.COMPLETED -> 100
         PuzzleStatus.IN_PROGRESS -> {
             val clamped = clamped(current)

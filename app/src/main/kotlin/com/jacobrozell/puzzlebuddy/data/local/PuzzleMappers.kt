@@ -8,6 +8,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleRating
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleTime
+import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
 import java.time.Instant
 
 fun PuzzleEntity.toDomain(): Puzzle = Puzzle(
@@ -30,7 +31,7 @@ fun PuzzleEntity.toDomain(): Puzzle = Puzzle(
     isDemo = isDemo,
     barcode = barcode,
     tags = tagsJson,
-    hasImage = imageData != null && imageData.isNotEmpty(),
+    photos = legacyCover(id, imageData, Instant.ofEpochMilli(completionDateEpochMillis)),
 )
 
 fun Puzzle.toEntity(imageData: ByteArray? = null): PuzzleEntity = PuzzleEntity(
@@ -52,3 +53,15 @@ fun Puzzle.toEntity(imageData: ByteArray? = null): PuzzleEntity = PuzzleEntity(
     tagsJson = PuzzleTagSemantics.sanitizedTags(tags),
     imageData = imageData,
 )
+
+private fun legacyCover(puzzleId: String, imageData: ByteArray?, createdAt: Instant): List<PuzzlePhoto> {
+    if (imageData == null || imageData.isEmpty()) return emptyList()
+    return listOf(
+        PuzzlePhoto(
+            id = puzzleId,
+            sortOrder = 0,
+            fileName = "legacy-cover.jpg",
+            createdAt = createdAt,
+        ),
+    )
+}

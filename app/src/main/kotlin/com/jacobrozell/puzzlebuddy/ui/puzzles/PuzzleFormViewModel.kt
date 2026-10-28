@@ -141,7 +141,7 @@ class PuzzleFormViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = state.copy(isLoading = true)
             repository.upsert(
-                puzzle = state.puzzle.copy(hasImage = state.imageData != null),
+                puzzle = state.puzzle,
                 imageData = state.imageData,
                 addSource = if (initialBarcode != null && puzzleId == null) {
                     PuzzleAddSource.BARCODE

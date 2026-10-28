@@ -50,9 +50,11 @@ object IPDbCSVFormat {
     }
 
     fun folderValue(status: PuzzleStatus): String = when (status) {
-        PuzzleStatus.TODO -> "Wishlist"
+        PuzzleStatus.WISHLIST -> "Wishlist"
+        PuzzleStatus.TODO -> "To-Do"
         PuzzleStatus.IN_PROGRESS -> "In-Progress"
         PuzzleStatus.COMPLETED -> "Completed"
+        PuzzleStatus.ABANDONED -> "Abandoned"
     }
 
     fun splitManufacturerId(notes: String?): Pair<String?, String?> {

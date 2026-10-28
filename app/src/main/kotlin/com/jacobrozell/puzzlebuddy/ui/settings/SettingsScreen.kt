@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacobrozell.puzzlebuddy.domain.catalog.DemoDataCatalog
 import com.jacobrozell.puzzlebuddy.domain.export.PuzzleCollectionExportFormat
 import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
@@ -77,7 +78,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { showDemoAlert = false },
             title = { Text("Load demo puzzles?") },
-            text = { Text("Adds four sample puzzles. Your existing puzzles stay in the collection.") },
+            text = { Text("Adds ${DemoDataCatalog.PUZZLE_COUNT} sample puzzles so you can explore the app. Your existing puzzles stay in the collection.") },
             confirmButton = {
                 TextButton(onClick = {
                     showDemoAlert = false

@@ -5,6 +5,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleRating
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleTime
+import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -30,7 +31,11 @@ class PuzzleListQueryTest {
         barcode = barcode,
         source = source,
         tags = tags,
-        hasImage = hasImage,
+        photos = if (hasImage) {
+            listOf(PuzzlePhoto(sortOrder = 0, fileName = "cover.jpg", createdAt = Instant.parse("2025-06-01T12:00:00Z")))
+        } else {
+            emptyList()
+        },
     )
 
     @Test

@@ -22,7 +22,7 @@ class IPDbCSVImporterTest {
         assertEquals("012345678905", puzzles[0].barcode)
         assertEquals(PuzzleStatus.COMPLETED, puzzles[0].status)
         assertEquals("Gift from Mom", puzzles[0].notes)
-        assertEquals(PuzzleStatus.TODO, puzzles[1].status)
+        assertEquals(PuzzleStatus.WISHLIST, puzzles[1].status)
         assertNull(puzzles[1].barcode)
     }
 

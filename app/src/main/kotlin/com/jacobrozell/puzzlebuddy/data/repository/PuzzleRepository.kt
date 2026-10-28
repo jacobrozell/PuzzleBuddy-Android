@@ -12,6 +12,8 @@ import com.jacobrozell.puzzlebuddy.domain.importing.IPDbCSVImporter
 import com.jacobrozell.puzzlebuddy.domain.importing.PuzzleImportSummary
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
+import java.time.Instant
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsMilestones
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
@@ -76,7 +78,21 @@ class PuzzleRepository @Inject constructor(
             imageData != null -> imageData
             else -> existing?.imageData
         }
-        val sanitized = puzzle.sanitized().copy(hasImage = image != null)
+        val withPhoto = if (image != null && puzzle.photos.isEmpty()) {
+            puzzle.copy(
+                photos = listOf(
+                    PuzzlePhoto(
+                        id = puzzle.id,
+                        sortOrder = 0,
+                        fileName = "legacy-cover.jpg",
+                        createdAt = Instant.EPOCH,
+                    ),
+                ),
+            )
+        } else {
+            puzzle
+        }
+        val sanitized = withPhoto.sanitized()
         puzzleDao.upsert(sanitized.toEntity(image))
         if (image != null) {
             imageCache.put(puzzle.id, image)
