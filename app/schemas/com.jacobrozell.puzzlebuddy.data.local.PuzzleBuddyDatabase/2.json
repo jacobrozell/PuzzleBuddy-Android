@@ -1,0 +1,384 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "c7079ebd99d2e1ef1aa768824cc6f1ec",
+    "entities": [
+      {
+        "tableName": "puzzles",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `pieces` INTEGER, `rating` REAL NOT NULL, `difficulty` TEXT NOT NULL, `estimatedTimeHours` INTEGER, `estimatedTimeMinutes` INTEGER, `completionDateEpochMillis` INTEGER NOT NULL, `startDateEpochMillis` INTEGER, `status` TEXT NOT NULL, `hasMissingPieces` INTEGER NOT NULL, `notes` TEXT, `source` TEXT, `purchaseLocation` TEXT, `releaseYear` INTEGER, `puzzleType` TEXT NOT NULL, `material` TEXT NOT NULL, `disposition` TEXT NOT NULL, `progressPercent` INTEGER NOT NULL, `purchasePrice` REAL, `purchaseCurrencyCode` TEXT, `puzzleShape` TEXT NOT NULL, `cutType` TEXT NOT NULL, `dimensionsText` TEXT, `timesCompleted` INTEGER NOT NULL, `isDemo` INTEGER NOT NULL, `barcode` TEXT, `tagsJson` TEXT NOT NULL, `isOnLoan` INTEGER NOT NULL, `loanedToFriendId` TEXT, `loanedAtEpochMillis` INTEGER, `dueBackEpochMillis` INTEGER, `lastLoanNudgeAtEpochMillis` INTEGER, `timerAccumulatedSeconds` INTEGER NOT NULL, `timerRunningSinceEpochMillis` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pieces",
+            "columnName": "pieces",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "difficulty",
+            "columnName": "difficulty",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimatedTimeHours",
+            "columnName": "estimatedTimeHours",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "estimatedTimeMinutes",
+            "columnName": "estimatedTimeMinutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completionDateEpochMillis",
+            "columnName": "completionDateEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDateEpochMillis",
+            "columnName": "startDateEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasMissingPieces",
+            "columnName": "hasMissingPieces",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "purchaseLocation",
+            "columnName": "purchaseLocation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "releaseYear",
+            "columnName": "releaseYear",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "puzzleType",
+            "columnName": "puzzleType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "material",
+            "columnName": "material",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disposition",
+            "columnName": "disposition",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progressPercent",
+            "columnName": "progressPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "purchasePrice",
+            "columnName": "purchasePrice",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "purchaseCurrencyCode",
+            "columnName": "purchaseCurrencyCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "puzzleShape",
+            "columnName": "puzzleShape",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cutType",
+            "columnName": "cutType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dimensionsText",
+            "columnName": "dimensionsText",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timesCompleted",
+            "columnName": "timesCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDemo",
+            "columnName": "isDemo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barcode",
+            "columnName": "barcode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tagsJson",
+            "columnName": "tagsJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isOnLoan",
+            "columnName": "isOnLoan",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loanedToFriendId",
+            "columnName": "loanedToFriendId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "loanedAtEpochMillis",
+            "columnName": "loanedAtEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dueBackEpochMillis",
+            "columnName": "dueBackEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastLoanNudgeAtEpochMillis",
+            "columnName": "lastLoanNudgeAtEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "timerAccumulatedSeconds",
+            "columnName": "timerAccumulatedSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timerRunningSinceEpochMillis",
+            "columnName": "timerRunningSinceEpochMillis",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "puzzle_photos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `puzzleId` TEXT NOT NULL, `sortOrder` INTEGER NOT NULL, `fileName` TEXT, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "puzzleId",
+            "columnName": "puzzleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "fileName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAtEpochMillis",
+            "columnName": "createdAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_puzzle_photos_puzzleId",
+            "unique": false,
+            "columnNames": [
+              "puzzleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_puzzle_photos_puzzleId` ON `${TABLE_NAME}` (`puzzleId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "puzzle_completions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `puzzleId` TEXT NOT NULL, `completionNumber` INTEGER NOT NULL, `startedAtEpochMillis` INTEGER, `completedAtEpochMillis` INTEGER NOT NULL, `timeSpentHours` INTEGER, `timeSpentMinutes` INTEGER, `rating` REAL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "puzzleId",
+            "columnName": "puzzleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completionNumber",
+            "columnName": "completionNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtEpochMillis",
+            "columnName": "startedAtEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "completedAtEpochMillis",
+            "columnName": "completedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeSpentHours",
+            "columnName": "timeSpentHours",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "timeSpentMinutes",
+            "columnName": "timeSpentMinutes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "rating",
+            "columnName": "rating",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_puzzle_completions_puzzleId",
+            "unique": false,
+            "columnNames": [
+              "puzzleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_puzzle_completions_puzzleId` ON `${TABLE_NAME}` (`puzzleId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "friends",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `displayName` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `remoteId` TEXT, `isDemo` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMillis",
+            "columnName": "createdAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtEpochMillis",
+            "columnName": "updatedAtEpochMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isDemo",
+            "columnName": "isDemo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7079ebd99d2e1ef1aa768824cc6f1ec')"
+    ]
+  }
+}
