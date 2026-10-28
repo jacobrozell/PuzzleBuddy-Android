@@ -24,6 +24,8 @@ jobs:
         with:
           repository: jacobrozell/PuzzleBuddy
           path: PuzzleBuddy
+          # Pin to the iOS 1.1.0 build branch until iOS merges 1.1.0 into main; then remove.
+          ref: feature/1.2.0-puzzle-timer
 
       - name: Verify Firebase telemetry parity
         run: ./scripts/check-firebase-parity.sh
