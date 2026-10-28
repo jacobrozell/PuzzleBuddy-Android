@@ -25,6 +25,7 @@ class AppBootstrapper @Inject constructor(
         didLogReady = true
         sessionContext.beginSession()
         userContext.syncOnboardingComplete()
+        repository.pauseSkewedTimers()
         val puzzles = repository.allPuzzles()
         barcodeMetadataCache.warmCache(puzzles)
         logger.info(

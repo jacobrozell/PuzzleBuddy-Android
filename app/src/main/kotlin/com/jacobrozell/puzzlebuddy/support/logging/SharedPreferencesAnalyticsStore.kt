@@ -24,6 +24,12 @@ class SharedPreferencesAnalyticsStore(
         prefs.edit().putStringSet(key, values).apply()
     }
 
+    override fun getBoolean(key: String): Boolean = prefs.getBoolean(key, false)
+
+    override fun putBoolean(key: String, value: Boolean) {
+        prefs.edit().putBoolean(key, value).apply()
+    }
+
     companion object {
         const val PREFS_NAME = "puzzle_buddy_analytics"
     }

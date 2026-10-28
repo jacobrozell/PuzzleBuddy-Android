@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.jacobrozell.puzzlebuddy"
     compileSdk = 36
