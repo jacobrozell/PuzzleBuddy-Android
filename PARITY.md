@@ -2,10 +2,10 @@
 
 > **Dashboard:** [`STATUS.md`](STATUS.md)
 
-**Target:** Puzzle Buddy **1.0.0** local-first lean on Android (`release/1.0.0`)  
-**iOS baseline:** `PuzzleBuddy/release/1.1.0` allowlists (product 1.1 **not** ported)  
+**Target:** Puzzle Buddy **1.1.0** in progress on `claude/pensive-knuth-liq0g4` (iOS `feature/1.2.0-puzzle-timer` @ `1f9845c`)  
+**iOS baseline:** `PuzzleBuddy` @ `1f9845c`  
 **Android path:** `PuzzleBuddy-Android/`  
-**Last updated:** 2026-09-25
+**Last updated:** 2026-10-28
 
 ## Legend
 
@@ -109,9 +109,10 @@
 | Feature | Notes |
 |---------|-------|
 | iOS DesignTokens pixel match | Brand background simplified |
-| On loan / Friends | iOS 1.1; Android model+UI not started |
-| Completion history edit / undo / What's New | iOS 1.1; events allowlisted only |
-| Wishlist / Abandoned statuses | iOS 1.0+; snapshot params send `0` |
+| On loan / Friends | Model, store, form switch, list badge, and detail rows are in. People list stays off, matching iOS. |
+| Completion history edit / undo / What's New | Repository operations exist. History editor, undo banner, and What's New sheet are not in the UI yet. |
+| Wishlist / Abandoned statuses | Status values, filters, and progress rules are in. Snapshot counts use the real statuses. |
+| In-app timer | Semantics and repository commands exist. The detail timer card is not in the UI yet. "Timer running" shows on the list when a timer is running. |
 
 ---
 
@@ -124,3 +125,4 @@
 | 2026-06-23 | Barcode scan, shopping mode, export share — ~90% parity |
 | 2026-06-23 | Tablet: navigation rail, two-pane detail/form, stats grid, adaptive list |
 | 2026-09-25 | 1.1 Analytics allowlist + session snapshot / milestones / user properties; product 1.1 deferred |
+| 2026-10-28 | iOS 1.1 domain, Room v2, and repository (photos on disk, completions, friends, timer commands, demo catalog of 13) landed on `claude/pensive-knuth-liq0g4`. List, form, and detail show the new fields. Still open: timer card, completion history UI, undo banner, stats rewrite, share collage, What's New, Play review prompt, remove UPCitemdb and import/export settings, JSON backup parity, emulator QA. |

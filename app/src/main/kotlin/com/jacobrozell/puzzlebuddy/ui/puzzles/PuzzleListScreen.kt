@@ -71,7 +71,13 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListPieceCountFilter
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListSortOption
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListStatusFilter
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import com.jacobrozell.puzzlebuddy.domain.loan.PuzzleLoanSemantics
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.domain.timer.PuzzleTimerSemantics
+import java.time.Instant
 import com.jacobrozell.puzzlebuddy.ui.components.PuzzlePhoto
 import com.jacobrozell.puzzlebuddy.ui.components.StarRatingSummary
 import java.time.ZoneId
@@ -354,13 +360,24 @@ private fun SwipeablePuzzleRow(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 private fun PuzzleRowCard(
     puzzle: Puzzle,
     repository: PuzzleRepository,
     onClick: () -> Unit,
 ) {
-    val dateLabel = DateTimeFormatter.ofPattern("MMM d, yyyy")
-        .format(puzzle.completionDate.atZone(ZoneId.systemDefault()))
+    val now = Instant.now()
+    val zone = ZoneId.systemDefault()
+    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+    val dateLabel = when (puzzle.status) {
+        PuzzleStatus.COMPLETED ->
+            formatter.format(puzzle.completionDate.atZone(zone))
+        PuzzleStatus.IN_PROGRESS ->
+            "Started ${formatter.format((puzzle.startDate ?: puzzle.completionDate).atZone(zone))}"
+        else -> formatter.format(puzzle.completionDate.atZone(zone))
+    }
+    val loanLabel = if (puzzle.isOnLoan) PuzzleLoanSemantics.listBadgeTitle(puzzle, now, zone) else null
+    val timerRunning = PuzzleTimerSemantics.isRunning(puzzle.timerRunningSince, now)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -369,7 +386,10 @@ private fun PuzzleRowCard(
                 contentDescription = buildString {
                     append(puzzle.name)
                     puzzle.pieces?.let { append(", $it pieces") }
-                    append(", ${puzzle.status.raw}")
+                    append(", ${puzzle.status.accessibilityDescription}")
+                    if (puzzle.timesCompleted > 1) append(", Completed ${puzzle.timesCompleted} times")
+                    loanLabel?.let { append(", $it") }
+                    if (timerRunning) append(", Timer running")
                     append(", $dateLabel")
                 }
             },
@@ -403,6 +423,20 @@ private fun PuzzleRowCard(
                     Text(dateLabel, style = MaterialTheme.typography.labelMedium)
                 }
                 StarRatingSummary(rating = puzzle.rating)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (puzzle.timesCompleted > 1) {
+                        FilterChip(selected = false, onClick = {}, enabled = false, label = { Text("×${puzzle.timesCompleted}") })
+                    }
+                    if (puzzle.hasMissingPieces) {
+                        FilterChip(selected = false, onClick = {}, enabled = false, label = { Text("Missing pieces") })
+                    }
+                    loanLabel?.let { title ->
+                        FilterChip(selected = false, onClick = {}, enabled = false, label = { Text(title) })
+                    }
+                    if (timerRunning) {
+                        FilterChip(selected = false, onClick = {}, enabled = false, label = { Text("Timer running") })
+                    }
+                }
             }
             FilterChip(
                 selected = false,

@@ -42,8 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleProgressSemantics
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleCutType
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDisposition
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleMaterial
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleShape
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleType
 import com.jacobrozell.puzzlebuddy.ui.components.HalfStarRatingRow
 import com.jacobrozell.puzzlebuddy.ui.components.PuzzlePhotoPicker
 import com.jacobrozell.puzzlebuddy.ui.components.PuzzleTagsField
@@ -222,6 +227,61 @@ fun PuzzleFormScreen(
                 checked = puzzle.hasMissingPieces,
                 onCheckedChange = viewModel::updateHasMissingPieces,
             )
+            OutlinedTextField(
+                value = puzzle.purchaseLocation.orEmpty(),
+                onValueChange = viewModel::updatePurchaseLocation,
+                label = { Text("Purchase location") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = puzzle.purchasePrice?.toString().orEmpty(),
+                onValueChange = viewModel::updatePrice,
+                label = { Text("Price") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = puzzle.releaseYear?.toString().orEmpty(),
+                onValueChange = viewModel::updateReleaseYear,
+                label = { Text("Release year") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+            )
+            EnumPicker("Type", PuzzleType.entries, puzzle.puzzleType, { it.displayLabel }, viewModel::updateType)
+            EnumPicker("Material", PuzzleMaterial.entries, puzzle.material, { it.displayLabel }, viewModel::updateMaterial)
+            EnumPicker("Shape", PuzzleShape.entries, puzzle.puzzleShape, { it.displayLabel }, viewModel::updateShape)
+            EnumPicker("Cut", PuzzleCutType.entries, puzzle.cutType, { it.displayLabel }, viewModel::updateCutType)
+            OutlinedTextField(
+                value = puzzle.dimensionsText.orEmpty(),
+                onValueChange = viewModel::updateDimensions,
+                label = { Text("Dimensions") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            EnumPicker(
+                "Disposition",
+                PuzzleDisposition.entries,
+                puzzle.disposition,
+                { it.displayLabel },
+                viewModel::updateDisposition,
+            )
+            RowWithSwitch(
+                label = "On loan",
+                checked = puzzle.isOnLoan,
+                onCheckedChange = viewModel::updateOnLoan,
+            )
+            if (puzzle.isOnLoan) {
+                OutlinedTextField(
+                    value = puzzle.loanedToDisplayName.orEmpty(),
+                    onValueChange = viewModel::updateLoanedTo,
+                    label = { Text("Loaned to (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+            }
             Button(
                 onClick = { viewModel.save(onFinished) },
                 enabled = state.canSave && !state.isLoading,

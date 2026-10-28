@@ -28,9 +28,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleDateSemantics
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleProgressSemantics
+import com.jacobrozell.puzzlebuddy.domain.catalog.PurchasePriceFormatting
+import com.jacobrozell.puzzlebuddy.domain.loan.PuzzleLoanSemantics
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import java.time.Instant
 import com.jacobrozell.puzzlebuddy.ui.components.PuzzlePhoto
 import com.jacobrozell.puzzlebuddy.ui.components.StarRatingSummary
 import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveTwoPane
@@ -73,9 +77,14 @@ fun PuzzleDetailScreen(
         },
     ) { padding ->
         if (puzzle == null) {
-            Text("Puzzle not found", modifier = Modifier.padding(padding).padding(16.dp))
+            Text(
+                "That puzzle is no longer in your collection.",
+                modifier = Modifier.padding(padding).padding(16.dp),
+            )
             return@Scaffold
         }
+        val now = Instant.now()
+        val zone = ZoneId.systemDefault()
         val dateLabel = DateTimeFormatter.ofPattern("MMMM d, yyyy")
             .format(puzzle.completionDate.atZone(ZoneId.systemDefault()))
 
@@ -126,15 +135,32 @@ fun PuzzleDetailScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            DetailRow("Status", puzzle.status.raw)
+                            DetailRow("Status", puzzle.status.accessibilityDescription)
                             if (puzzle.status == PuzzleStatus.IN_PROGRESS) {
                                 DetailRow("Progress", PuzzleProgressSemantics.displayLabel(puzzle.progressPercent))
                             }
-                            DetailRow("Completion date", dateLabel)
+                            DetailRow(PuzzleDateSemantics.detailDateLabel(puzzle.status), dateLabel)
+                            PuzzleDateSemantics.progressDaysLabel(puzzle, zone, now)?.let { DetailRow("Days", it) }
                             puzzle.estimatedTimeSpent?.displayLabel()?.let { DetailRow("Time spent", it) }
                             puzzle.pieces?.let { DetailRow("Pieces", it.toString()) }
                             state.metrics.timeBucketLabel?.let { DetailRow("Puzzle pace", it) }
                             state.metrics.formattedHoursPer1000Pieces?.let { DetailRow("Pace", it) }
+                            puzzle.purchaseLocation?.let { DetailRow("Purchase location", it) }
+                            puzzle.purchasePrice?.let {
+                                DetailRow("Price", PurchasePriceFormatting.displayLabel(it, puzzle.purchaseCurrencyCode))
+                            }
+                            puzzle.releaseYear?.let { DetailRow("Year", it.toString()) }
+                            if (puzzle.puzzleType.raw != "None") DetailRow("Type", puzzle.puzzleType.displayLabel)
+                            if (puzzle.material.raw != "None") DetailRow("Material", puzzle.material.displayLabel)
+                            if (puzzle.puzzleShape.raw != "None") DetailRow("Shape", puzzle.puzzleShape.displayLabel)
+                            if (puzzle.cutType.raw != "None") DetailRow("Cut", puzzle.cutType.displayLabel)
+                            puzzle.dimensionsText?.let { DetailRow("Dimensions", it) }
+                            if (puzzle.disposition.raw != "None") DetailRow("Disposition", puzzle.disposition.displayLabel)
+                            if (puzzle.timesCompleted > 1) DetailRow("Completed", "${puzzle.timesCompleted} times")
+                            if (puzzle.isOnLoan) {
+                                puzzle.loanedToDisplayName?.let { DetailRow("Loaned to", it) }
+                                PuzzleLoanSemantics.dueBackDisplayValue(puzzle, now, zone)?.let { DetailRow("Due back", it) }
+                            }
                             puzzle.notes?.let { DetailRow("Notes", it) }
                             if (puzzle.hasMissingPieces) DetailRow("Missing pieces", "Yes")
                             puzzle.barcode?.let { DetailRow("Barcode", it) }
