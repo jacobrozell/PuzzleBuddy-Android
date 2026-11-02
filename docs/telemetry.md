@@ -2,7 +2,7 @@
 
 **Canonical spec (iOS + Android):** [`../PuzzleBuddy/docs/telemetry.md`](../../PuzzleBuddy/docs/telemetry.md)
 
-**Cross-platform parity:** [`../workspace/firebase-cross-platform-parity.md`](../../workspace/firebase-cross-platform-parity.md)
+**Cross-platform parity:** [`../workspace/firebase-cross-platform-parity.md`](../../../workspace/firebase-cross-platform-parity.md)
 
 **Verify allowlists match iOS:**
 

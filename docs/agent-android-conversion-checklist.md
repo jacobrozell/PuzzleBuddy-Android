@@ -1,6 +1,6 @@
 # Agent Android conversion checklist — Puzzle Buddy
 
-Copied from [`workspace/agent-android-conversion-checklist-template.md`](../../workspace/agent-android-conversion-checklist-template.md).
+Copied from [`workspace/agent-android-conversion-checklist-template.md`](../../../workspace/agent-android-conversion-checklist-template.md).
 
 ## Start here
 
