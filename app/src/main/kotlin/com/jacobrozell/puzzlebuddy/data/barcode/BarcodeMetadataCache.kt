@@ -26,6 +26,8 @@ private data class CachedBarcodeEntry(
     val title: String? = null,
     val brand: String? = null,
     val pieces: Int? = null,
+    val sourcePuzzleId: String? = null,
+    val sourcePuzzleName: String? = null,
 )
 
 @Singleton
@@ -38,11 +40,7 @@ class BarcodeMetadataCache @Inject constructor(
     override suspend fun storeFromPuzzle(puzzle: Puzzle) {
         val normalized = BarcodeValidator.normalizeOrNull(puzzle.barcode.orEmpty()) ?: return
         val cache = loadCache().toMutableMap()
-        cache[normalized] = CachedBarcodeEntry(
-            title = BarcodeTitleParser.cleanedTitle(puzzle.name),
-            brand = BarcodeTitleParser.cleanedTitle(puzzle.source),
-            pieces = puzzle.pieces,
-        )
+        cache[normalized] = entryFor(puzzle)
         saveCache(cache)
     }
 
@@ -50,11 +48,7 @@ class BarcodeMetadataCache @Inject constructor(
         val cache = loadCache().toMutableMap()
         for (puzzle in puzzles) {
             val normalized = BarcodeValidator.normalizeOrNull(puzzle.barcode.orEmpty()) ?: continue
-            cache[normalized] = CachedBarcodeEntry(
-                title = BarcodeTitleParser.cleanedTitle(puzzle.name),
-                brand = BarcodeTitleParser.cleanedTitle(puzzle.source),
-                pieces = puzzle.pieces,
-            )
+            cache[normalized] = entryFor(puzzle)
         }
         saveCache(cache)
     }
@@ -66,23 +60,18 @@ class BarcodeMetadataCache @Inject constructor(
             title = entry.title,
             brand = entry.brand,
             pieces = entry.pieces,
-            imageUrl = null,
-            source = "local_cache",
+            sourcePuzzleId = entry.sourcePuzzleId,
+            sourcePuzzleName = entry.sourcePuzzleName,
         )
     }
 
-    suspend fun storeLookup(metadata: BarcodeProductMetadata, barcode: String) {
-        if (metadata.source != "upcitemdb") return
-        if (metadata.suggestedName == null && metadata.brand == null) return
-        val normalized = BarcodeValidator.normalizeOrNull(barcode) ?: return
-        val cache = loadCache().toMutableMap()
-        cache[normalized] = CachedBarcodeEntry(
-            title = metadata.title,
-            brand = metadata.brand,
-            pieces = metadata.suggestedPieces,
-        )
-        saveCache(cache)
-    }
+    private fun entryFor(puzzle: Puzzle) = CachedBarcodeEntry(
+        title = BarcodeTitleParser.cleanedTitle(puzzle.name),
+        brand = BarcodeTitleParser.cleanedTitle(puzzle.source),
+        pieces = puzzle.pieces,
+        sourcePuzzleId = puzzle.id,
+        sourcePuzzleName = BarcodeTitleParser.cleanedTitle(puzzle.name),
+    )
 
     private suspend fun loadCache(): Map<String, CachedBarcodeEntry> {
         val raw = context.barcodeCacheStore.data.first()[cacheKey] ?: return emptyMap()

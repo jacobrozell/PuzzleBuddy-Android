@@ -2,8 +2,8 @@ package com.jacobrozell.puzzlebuddy.ui.puzzles
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
-import com.jacobrozell.puzzlebuddy.domain.barcode.BarcodeLookupService
 import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListPieceCountFilter
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListQuery
@@ -36,7 +36,6 @@ data class PuzzleListUiState(
     val resultCountLabel: String = "",
     val emptyMessage: String = "",
     val scanAlert: ScanAlert? = null,
-    val isLookingUpBarcode: Boolean = false,
 )
 
 data class ScanAlert(val title: String, val message: String)
@@ -45,7 +44,7 @@ data class ScanAlert(val title: String, val message: String)
 class PuzzleListViewModel @Inject constructor(
     val repository: PuzzleRepository,
     private val logger: AppLogger,
-    private val barcodeLookupService: BarcodeLookupService,
+    private val barcodeMetadataCache: BarcodeMetadataCache,
     private val sessionContext: AnalyticsSessionContext,
 ) : ViewModel() {
     private var didLogListRefresh = false
@@ -56,7 +55,6 @@ class PuzzleListViewModel @Inject constructor(
     private val needsPhotoOnly = MutableStateFlow(false)
     private val pieceCountFilter = MutableStateFlow(PuzzleListPieceCountFilter.ANY)
     private val scanAlert = MutableStateFlow<ScanAlert?>(null)
-    private val isLookingUpBarcode = MutableStateFlow(false)
 
     val uiState: StateFlow<PuzzleListUiState> = combine(
         repository.observePuzzles(),
@@ -67,7 +65,6 @@ class PuzzleListViewModel @Inject constructor(
         needsPhotoOnly,
         pieceCountFilter,
         scanAlert,
-        isLookingUpBarcode,
     ) { values ->
         @Suppress("UNCHECKED_CAST")
         val puzzles = values[0] as List<Puzzle>
@@ -78,7 +75,6 @@ class PuzzleListViewModel @Inject constructor(
         val photoOnly = values[5] as Boolean
         val pieceFilter = values[6] as PuzzleListPieceCountFilter
         val alert = values[7] as ScanAlert?
-        val lookingUp = values[8] as Boolean
         val displayed = PuzzleListQuery.apply(
             puzzles = puzzles,
             statusFilter = status,
@@ -110,7 +106,6 @@ class PuzzleListViewModel @Inject constructor(
             ),
             emptyMessage = status.emptyStateMessage(PuzzleListQuery.hasActiveSearch(search)),
             scanAlert = alert,
-            isLookingUpBarcode = lookingUp,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PuzzleListUiState())
 
@@ -191,10 +186,7 @@ class PuzzleListViewModel @Inject constructor(
                 )
                 return@launch
             }
-            isLookingUpBarcode.value = true
-            val lookup = barcodeLookupService.lookup(normalized)
-            isLookingUpBarcode.value = false
-            val metadata = lookup.metadata
+            val metadata = barcodeMetadataCache.metadataFor(normalized)
             logger.info(
                 LogCategory.PUZZLES,
                 eventName = "barcode_scan_completed",
@@ -210,7 +202,6 @@ class PuzzleListViewModel @Inject constructor(
                     name = metadata?.suggestedName,
                     pieces = metadata?.suggestedPieces,
                     source = metadata?.brand,
-                    lookupNotice = lookup.notice?.message,
                 ),
             )
         }

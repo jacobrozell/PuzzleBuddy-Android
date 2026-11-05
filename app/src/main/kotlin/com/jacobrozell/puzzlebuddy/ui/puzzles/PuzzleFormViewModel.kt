@@ -37,7 +37,6 @@ data class PuzzleFormUiState(
     val isLoading: Boolean = false,
     val canSave: Boolean = false,
     val tagCatalog: List<String> = emptyList(),
-    val lookupNotice: String? = null,
 ) {
     override fun equals(other: Any?): Boolean = this === other
     override fun hashCode(): Int = puzzle.id.hashCode()
@@ -55,7 +54,6 @@ class PuzzleFormViewModel @Inject constructor(
     private val initialName: String? = savedStateHandle.get<String>("name")?.takeIf { it.isNotBlank() }
     private val initialPieces: Int? = savedStateHandle.get<String>("pieces")?.toIntOrNull()
     private val initialSource: String? = savedStateHandle.get<String>("source")?.takeIf { it.isNotBlank() }
-    private val initialLookupNotice: String? = savedStateHandle.get<String>("lookup_notice")?.takeIf { it.isNotBlank() }
     private val _uiState = MutableStateFlow(PuzzleFormUiState())
     val uiState: StateFlow<PuzzleFormUiState> = _uiState.asStateFlow()
 
@@ -73,7 +71,6 @@ class PuzzleFormViewModel @Inject constructor(
                     source = initialSource,
                 ),
                 canSave = !initialName.isNullOrBlank(),
-                lookupNotice = initialLookupNotice,
             )
         }
         if (puzzleId != null) {
@@ -94,10 +91,6 @@ class PuzzleFormViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(tagCatalog = catalog)
             }
         }
-    }
-
-    fun dismissLookupNotice() {
-        _uiState.value = _uiState.value.copy(lookupNotice = null)
     }
 
     fun updateName(name: String) = update { it.copy(name = name) }

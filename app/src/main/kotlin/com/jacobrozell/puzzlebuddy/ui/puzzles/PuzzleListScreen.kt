@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -310,16 +309,6 @@ fun PuzzleListScreen(
         }
         }
     }
-        if (state.isLookingUpBarcode) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
     }
 }
 

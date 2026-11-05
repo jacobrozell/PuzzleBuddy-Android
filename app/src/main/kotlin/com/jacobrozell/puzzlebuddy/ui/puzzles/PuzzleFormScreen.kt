@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -85,18 +84,6 @@ fun PuzzleFormScreen(
                 },
             )
         }
-    }
-    state.lookupNotice?.let { notice ->
-        AlertDialog(
-            onDismissRequest = viewModel::dismissLookupNotice,
-            title = { Text("Product lookup") },
-            text = { Text(notice) },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = viewModel::dismissLookupNotice) {
-                    Text("OK")
-                }
-            },
-        )
     }
 
     Scaffold(

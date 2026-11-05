@@ -31,7 +31,6 @@ data class SettingsUiState(
     val puzzleCount: Int = 0,
     val demoCount: Int = 0,
     val appearanceMode: String = "system",
-    val barcodeLookupEnabled: Boolean = false,
     val isBusy: Boolean = false,
     val importSummary: PuzzleImportSummary? = null,
     val errorMessage: String? = null,
@@ -55,7 +54,6 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = combine(
         repository.observePuzzles(),
         appPreferences.appearanceMode,
-        appPreferences.isBarcodeLookupEnabled,
         busy,
         importSummary,
         errorMessage,
@@ -66,13 +64,12 @@ class SettingsViewModel @Inject constructor(
         val puzzles = values[0] as List<Puzzle>
         SettingsUiState(
             puzzleCount = puzzles.size,
-            demoCount = values[7] as Int,
+            demoCount = values[6] as Int,
             appearanceMode = values[1] as String,
-            barcodeLookupEnabled = values[2] as Boolean,
-            isBusy = values[3] as Boolean,
-            importSummary = values[4] as PuzzleImportSummary?,
-            errorMessage = values[5] as String?,
-            exportErrorMessage = values[6] as String?,
+            isBusy = values[2] as Boolean,
+            importSummary = values[3] as PuzzleImportSummary?,
+            errorMessage = values[4] as String?,
+            exportErrorMessage = values[5] as String?,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 
@@ -82,10 +79,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setAppearance(mode: String) {
         viewModelScope.launch { appPreferences.setAppearanceMode(mode) }
-    }
-
-    fun setBarcodeLookupEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPreferences.setBarcodeLookupEnabled(enabled) }
     }
 
     fun exportCollection(format: PuzzleCollectionExportFormat) {

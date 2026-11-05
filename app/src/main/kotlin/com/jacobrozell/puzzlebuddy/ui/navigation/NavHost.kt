@@ -128,13 +128,12 @@ fun PuzzleBuddyNavHost(onReplayOnboarding: () -> Unit = {}) {
                     SettingsScreen(onReplayOnboarding = onReplayOnboarding)
                 }
                 composable(
-                    route = "puzzle/new?barcode={barcode}&name={name}&pieces={pieces}&source={source}&lookup_notice={lookup_notice}",
+                    route = "puzzle/new?barcode={barcode}&name={name}&pieces={pieces}&source={source}",
                     arguments = listOf(
                         navArgument("barcode") { type = NavType.StringType; defaultValue = "" },
                         navArgument("name") { type = NavType.StringType; defaultValue = "" },
                         navArgument("pieces") { type = NavType.StringType; defaultValue = "" },
                         navArgument("source") { type = NavType.StringType; defaultValue = "" },
-                        navArgument("lookup_notice") { type = NavType.StringType; defaultValue = "" },
                     ),
                 ) {
                     PuzzleFormScreen(

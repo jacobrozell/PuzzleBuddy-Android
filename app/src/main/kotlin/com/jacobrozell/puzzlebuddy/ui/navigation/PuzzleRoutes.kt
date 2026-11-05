@@ -9,7 +9,6 @@ object PuzzleRoutes {
         request.name?.let { append("&name=${Uri.encode(it)}") }
         request.pieces?.let { append("&pieces=$it") }
         request.source?.let { append("&source=${Uri.encode(it)}") }
-        request.lookupNotice?.let { append("&lookup_notice=${Uri.encode(it)}") }
     }
 
     fun newPuzzleRoute(barcode: String? = null): String =

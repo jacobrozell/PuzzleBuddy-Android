@@ -11,7 +11,6 @@ object ProductSurface {
     val isBarcodeScanEnabled: Boolean = true
     val isShoppingModeEnabled: Boolean = true
     val isIPDbImportEnabled: Boolean = true
-    val isBarcodeLookupEnabled: Boolean = false
 
     val rootTabs: List<RootTab> = listOf(RootTab.PUZZLES, RootTab.STATS, RootTab.SETTINGS)
 }
