@@ -39,6 +39,8 @@ data class PuzzleListUiState(
     val showsAddPuzzleAction: Boolean = false,
     val pendingDelete: Puzzle? = null,
     val scanAlert: ScanAlert? = null,
+    /** A list scan found a puzzle that already uses the barcode. */
+    val scanMatch: Puzzle? = null,
 )
 
 data class ScanAlert(val title: String, val message: String)
@@ -55,14 +57,15 @@ class PuzzleListViewModel @Inject constructor(
     private val sortOption = MutableStateFlow(PuzzleListSortOption.COMPLETION_DATE)
     private val pendingDelete = MutableStateFlow<Puzzle?>(null)
     private val scanAlert = MutableStateFlow<ScanAlert?>(null)
+    private val scanMatch = MutableStateFlow<Puzzle?>(null)
 
     val uiState: StateFlow<PuzzleListUiState> = combine(
         repository.observePuzzles(),
         filters,
         sortOption,
         pendingDelete,
-        scanAlert,
-    ) { puzzles, filters, sort, deleting, alert ->
+        combine(scanAlert, scanMatch, ::Pair),
+    ) { puzzles, filters, sort, deleting, (alert, match) ->
         val displayed = filters.apply(puzzles, sort)
         PuzzleListUiState(
             allPuzzles = puzzles,
@@ -79,6 +82,7 @@ class PuzzleListViewModel @Inject constructor(
             showsAddPuzzleAction = PuzzleListEmptyState.showsAddPuzzleAction(puzzles.size, filters),
             pendingDelete = deleting,
             scanAlert = alert,
+            scanMatch = match,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PuzzleListUiState())
 
@@ -140,6 +144,10 @@ class PuzzleListViewModel @Inject constructor(
         scanAlert.value = null
     }
 
+    fun dismissScanMatch() {
+        scanMatch.value = null
+    }
+
     fun handleScannedBarcode(raw: String, onQuickAdd: (QuickAddRequest) -> Unit) {
         viewModelScope.launch {
             val normalized = BarcodeValidator.normalizeOrNull(raw)
@@ -161,10 +169,7 @@ class PuzzleListViewModel @Inject constructor(
                         "scan_result" to "match",
                     ),
                 )
-                scanAlert.value = ScanAlert(
-                    title = "Already in your collection",
-                    message = "${duplicate.name} already uses this barcode.",
-                )
+                scanMatch.value = duplicate
                 return@launch
             }
             val metadata = barcodeMetadataCache.metadataFor(normalized)

@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,15 +20,15 @@ class ShoppingModeViewModel @Inject constructor(
     private val repository: PuzzleRepository,
     private val logger: AppLogger,
 ) : ViewModel() {
-    private val _scanResult = MutableStateFlow<ShoppingScanResult?>(null)
-    val scanResult: StateFlow<ShoppingScanResult?> = _scanResult.asStateFlow()
+    private val _state = MutableStateFlow(ShoppingModeState())
+    val state: StateFlow<ShoppingModeState> = _state.asStateFlow()
 
     fun handleScan(raw: String) {
-        if (_scanResult.value != null) return
+        if (_state.value.result != null) return
         viewModelScope.launch {
             val normalized = BarcodeValidator.normalizeOrNull(raw) ?: return@launch
             val match = repository.findByBarcode(normalized)
-            _scanResult.value = if (match != null) {
+            val result = if (match != null) {
                 logger.info(
                     LogCategory.PUZZLES,
                     eventName = "shopping_scan_match",
@@ -60,10 +61,23 @@ class ShoppingModeViewModel @Inject constructor(
                 )
                 ShoppingScanResult.NoMatch(normalized)
             }
+            _state.update {
+                it.copy(
+                    result = result,
+                    scansTotal = it.scansTotal + 1,
+                    duplicatesFound = it.duplicatesFound + if (match != null) 1 else 0,
+                )
+            }
         }
     }
 
     fun clearResult() {
-        _scanResult.value = null
+        _state.update { it.copy(result = null) }
     }
 }
+
+data class ShoppingModeState(
+    val result: ShoppingScanResult? = null,
+    val scansTotal: Int = 0,
+    val duplicatesFound: Int = 0,
+)

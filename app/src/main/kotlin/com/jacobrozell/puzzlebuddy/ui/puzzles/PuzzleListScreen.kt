@@ -98,7 +98,9 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDisposition
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleMaterial
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleType
 import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
+import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScanResultCard
 import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScannerSheet
+import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingScanResult
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeScreen
 import com.jacobrozell.puzzlebuddy.ui.components.BrandFilterChip
 import com.jacobrozell.puzzlebuddy.ui.components.ChipTone
@@ -141,6 +143,23 @@ fun PuzzleListScreen(
             text = { Text(alert.message) },
             confirmButton = { TextButton(onClick = viewModel::dismissScanAlert) { Text("OK") } },
         )
+    }
+
+    state.scanMatch?.let { match ->
+        Dialog(onDismissRequest = viewModel::dismissScanMatch) {
+            BarcodeScanResultCard(
+                result = ShoppingScanResult.Match(match),
+                onOpenPuzzle = { puzzle ->
+                    viewModel.dismissScanMatch()
+                    onOpenPuzzle(puzzle.id)
+                },
+                onAddPuzzle = {},
+                onScanAnother = {
+                    viewModel.dismissScanMatch()
+                    requestCameraAndRun { showScanner = true }
+                },
+            )
+        }
     }
 
     state.pendingDelete?.let { puzzle ->
