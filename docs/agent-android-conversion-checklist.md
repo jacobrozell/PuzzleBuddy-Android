@@ -6,7 +6,7 @@ Copied from [`workspace/agent-android-conversion-checklist-template.md`](../../.
 
 | Field | Value |
 |-------|-------|
-| **iOS source** | `../PuzzleBuddy/`, `feature/1.2.0-puzzle-timer` @ `1f9845c` |
+| **iOS source** | `../PuzzleBuddy/`, tag `1.1.0` |
 | **Android target** | `PuzzleBuddy-Android/`, `com.jacobrozell.puzzlebuddy`, minSdk 28 |
 | **Parity goal** | iOS 1.1.0 local catalog, including the in-app timer |
 

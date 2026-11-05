@@ -1,12 +1,12 @@
 # iOS ↔ Android parity tracker
 
 > **Dashboard:** [`STATUS.md`](STATUS.md)  
-> **Plan:** [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md)
+> **Plan:** [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md) (order of work) · [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md) (WP detail)
 
-**Target:** iOS 1.1.0 (`feature/1.2.0-puzzle-timer` @ `1f9845c`)  
+**Target:** iOS tag `1.1.0` (shipped 2026-11-02)  
 **Android branch:** `claude/pensive-knuth-liq0g4`  
 **Repo version:** 1.0.0 (1) — not bumped yet  
-**Last updated:** 2026-10-28
+**Last updated:** 2026-11-05
 
 ## Legend
 
@@ -38,7 +38,7 @@
 | What's New | ⬜ |
 | Store-reset and ephemeral banners | 🟡 flag and Crashlytics events; no banner |
 | Delete all data, including borrower names | 🟡 repository; Settings copy still says puzzles |
-| Analytics allowlist | ✅ matches `1f9845c` |
+| Analytics allowlist | ✅ matches tag `1.1.0` |
 | Onboarding copy (no lookup, no IPDb) | ⬜ still the old copy |
 | Tablet two-pane layout | ✅ existing Android layout |
 
@@ -79,7 +79,7 @@
 | TalkBack audit | 🟡 |
 | Login / cloud sync | 🚫 off |
 
-Remove the CI pin in `.github/workflows/ci.yml` (`ref: feature/1.2.0-puzzle-timer`) once iOS merges 1.1.0 into `main`.
+CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. Bump it when Android targets the next iOS tag.
 
 ## Session log
 
@@ -91,3 +91,4 @@ Remove the CI pin in `.github/workflows/ci.yml` (`ref: feature/1.2.0-puzzle-time
 | 2026-06-23 | Tablet: navigation rail, two-pane detail/form, stats grid, adaptive list |
 | 2026-09-25 | 1.1 Analytics allowlist + session snapshot / milestones / user properties; product 1.1 deferred |
 | 2026-10-28 | Domain, Room v2, and repository for iOS 1.1 landed on `claude/pensive-knuth-liq0g4`. List, form, and detail show the new fields. Unit tests passed. Emulator QA not done. Open: timer card, history UI, undo banner, stats screen, pick next, share, What's New, review prompt, drop UPCitemdb and import/export UI, JSON backup parity, version 1.1.0 (2). |
+| 2026-11-05 | Rebaselined on iOS tag `1.1.0`. CI repinned; parity script passes against the tag. 65 unit tests green. Plan: [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md). |

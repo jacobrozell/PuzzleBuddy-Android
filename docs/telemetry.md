@@ -16,7 +16,7 @@ When changing Analytics, Crashlytics, or `eventName` strings, update **both** re
 
 **Last updated:** 2026-10-28
 
-Android allowlists match iOS `1f9845c` (`FirebaseAnalyticsEventMapping`, `AnalyticsMetadataKeys`). Work is on `claude/pensive-knuth-liq0g4`. The app version is still 1.0.0 (1).
+Android allowlists match iOS tag `1.1.0` (`FirebaseAnalyticsEventMapping`, `AnalyticsMetadataKeys`). Work is on `claude/pensive-knuth-liq0g4`. The app version is still 1.0.0 (1).
 
 **Live on Android today**
 

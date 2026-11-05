@@ -1,8 +1,8 @@
 # Android port status
 
 > **Parity tracker:** [`PARITY.md`](PARITY.md)  
-> **Plan:** [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md)  
-> **Last updated:** 2026-10-28
+> **Plan:** [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md) (order of work) · [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md) (WP detail)  
+> **Last updated:** 2026-11-05
 
 ## Summary
 
@@ -14,7 +14,7 @@
 | **minSdk / targetSdk** | 28 / 36 |
 | **Stack** | Kotlin · Compose · Hilt · Room v2 · DataStore · CameraX · ML Kit · Firebase |
 | **Active branch** | `claude/pensive-knuth-liq0g4` |
-| **iOS baseline** | `PuzzleBuddy` `feature/1.2.0-puzzle-timer` @ `1f9845c` (the 1.1.0 build) |
+| **iOS baseline** | `PuzzleBuddy` tag `1.1.0` (on iOS `main`, live 2026-11-02) |
 
 ## Verification
 
@@ -36,7 +36,7 @@ Uses the shared **`puzzle-buddy`** Firebase project (same as iOS).
 4. Remote telemetry is **Release-only** by default (matches iOS Debug builds).
 5. Enable Crashlytics in Firebase Console → Build → Crashlytics.
 
-CI checks the allowlist against iOS `feature/1.2.0-puzzle-timer` until 1.1.0 is on iOS `main`.
+CI checks the allowlist against iOS tag `1.1.0`. Bump the `ref` in `.github/workflows/ci.yml` when Android targets the next iOS tag.
 
 ## Top remaining gaps
 

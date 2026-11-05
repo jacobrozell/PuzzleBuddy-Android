@@ -19,7 +19,7 @@ Firebase Analytics and Crashlytics turn on when `google-services.json` is real. 
 ./gradlew assembleDebug test   # passing
 ```
 
-**iOS repo:** [jacobrozell/PuzzleBuddy](https://github.com/jacobrozell/PuzzleBuddy) @ `1f9845c` · Behavior specs: `../PuzzleBuddy/specs/`
+**iOS repo:** [jacobrozell/PuzzleBuddy](https://github.com/jacobrozell/PuzzleBuddy) @ tag `1.1.0` · Behavior specs: `../PuzzleBuddy/specs/`
 
 ---
 
@@ -100,5 +100,5 @@ UI changes use the `android-verify` skill. Package id and test commands are in [
 
 ## iOS reference
 
-iOS source: sibling `../PuzzleBuddy/` at `1f9845c` (`feature/1.2.0-puzzle-timer`, the 1.1.0 build).  
+iOS source: sibling `../PuzzleBuddy/` at tag `1.1.0`.  
 Behavior specs: `PuzzleBuddy/specs/` and `PuzzleBuddy/docs/features.md`.
