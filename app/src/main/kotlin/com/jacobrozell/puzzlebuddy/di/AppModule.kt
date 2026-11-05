@@ -2,6 +2,8 @@ package com.jacobrozell.puzzlebuddy.di
 
 import android.content.Context
 import com.jacobrozell.puzzlebuddy.BuildConfig
+import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
+import com.jacobrozell.puzzlebuddy.data.demo.DemoAssetLoader
 import com.jacobrozell.puzzlebuddy.data.local.PuzzleBuddyDatabase
 import com.jacobrozell.puzzlebuddy.data.local.PuzzleBuddyDatabaseFactory
 import com.jacobrozell.puzzlebuddy.data.local.dao.FriendDao
@@ -10,10 +12,14 @@ import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzleDao
 import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzlePhotoDao
 import com.jacobrozell.puzzlebuddy.data.photo.PhotoFileStore
 import com.jacobrozell.puzzlebuddy.data.photo.PuzzlePhotoFileStore
+import com.jacobrozell.puzzlebuddy.data.repository.CollectionAnalyticsSync
+import com.jacobrozell.puzzlebuddy.data.repository.DemoPhotoSource
+import com.jacobrozell.puzzlebuddy.data.repository.PuzzleBarcodeRecorder
 import com.jacobrozell.puzzlebuddy.data.repository.RoomTransactionRunner
 import com.jacobrozell.puzzlebuddy.data.repository.TransactionRunner
 import com.jacobrozell.puzzlebuddy.support.FirebaseBootstrap
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsKeyValueStore
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.DefaultAppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.SharedPreferencesAnalyticsStore
@@ -83,4 +89,13 @@ abstract class RepositoryBindings {
     @Binds
     @Singleton
     abstract fun bindPhotoStore(impl: PuzzlePhotoFileStore): PhotoFileStore
+
+    @Binds
+    abstract fun bindBarcodeRecorder(impl: BarcodeMetadataCache): PuzzleBarcodeRecorder
+
+    @Binds
+    abstract fun bindDemoPhotos(impl: DemoAssetLoader): DemoPhotoSource
+
+    @Binds
+    abstract fun bindCollectionAnalytics(impl: AnalyticsUserContext): CollectionAnalyticsSync
 }

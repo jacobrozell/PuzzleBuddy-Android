@@ -1,6 +1,7 @@
 package com.jacobrozell.puzzlebuddy.support.logging
 
 import com.jacobrozell.puzzlebuddy.data.prefs.OnboardingStore
+import com.jacobrozell.puzzlebuddy.data.repository.CollectionAnalyticsSync
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.support.FirebaseBootstrap
 import kotlinx.coroutines.flow.first
@@ -16,13 +17,13 @@ import javax.inject.Singleton
 class AnalyticsUserContext @Inject constructor(
     private val firebaseBootstrap: FirebaseBootstrap,
     private val onboardingStore: OnboardingStore,
-) {
+) : CollectionAnalyticsSync {
     suspend fun syncOnboardingComplete(complete: Boolean? = null) {
         val value = complete ?: onboardingStore.isCompleteFlow.first()
         setUserProperties(mapOf("onboarding_complete" to PuzzleAnalyticsMetadata.boolString(value)))
     }
 
-    suspend fun syncCollection(puzzles: List<Puzzle>, onboardingComplete: Boolean? = null) {
+    override suspend fun syncCollection(puzzles: List<Puzzle>, onboardingComplete: Boolean?) {
         val complete = onboardingComplete ?: onboardingStore.isCompleteFlow.first()
         setUserProperties(PuzzleAnalyticsMetadata.userPropertyValues(puzzles, complete))
     }

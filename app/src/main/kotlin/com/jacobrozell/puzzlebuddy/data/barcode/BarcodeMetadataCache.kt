@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.jacobrozell.puzzlebuddy.data.repository.PuzzleBarcodeRecorder
 import com.jacobrozell.puzzlebuddy.domain.barcode.BarcodeProductMetadata
 import com.jacobrozell.puzzlebuddy.domain.barcode.BarcodeTitleParser
 import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
@@ -30,11 +31,11 @@ private data class CachedBarcodeEntry(
 @Singleton
 class BarcodeMetadataCache @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : PuzzleBarcodeRecorder {
     private val json = Json { ignoreUnknownKeys = true }
     private val cacheKey = stringPreferencesKey("entries_json")
 
-    suspend fun storeFromPuzzle(puzzle: Puzzle) {
+    override suspend fun storeFromPuzzle(puzzle: Puzzle) {
         val normalized = BarcodeValidator.normalizeOrNull(puzzle.barcode.orEmpty()) ?: return
         val cache = loadCache().toMutableMap()
         cache[normalized] = CachedBarcodeEntry(

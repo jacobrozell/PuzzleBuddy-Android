@@ -1,7 +1,5 @@
 package com.jacobrozell.puzzlebuddy.data.repository
 
-import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
-import com.jacobrozell.puzzlebuddy.data.demo.DemoAssetLoader
 import com.jacobrozell.puzzlebuddy.data.local.dao.FriendDao
 import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzleCompletionDao
 import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzleDao
@@ -26,7 +24,6 @@ import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhotoSemantics
 import com.jacobrozell.puzzlebuddy.domain.timer.PuzzleTimerSemantics
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsMilestones
-import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAddSource
@@ -56,12 +53,12 @@ class PuzzleRepository @Inject constructor(
     private val friendRepository: FriendRepository,
     private val transactions: TransactionRunner,
     private val photoStore: PhotoFileStore,
-    private val demoAssets: DemoAssetLoader,
+    private val demoAssets: DemoPhotoSource,
     private val clock: Clock,
     private val logger: AppLogger,
-    private val barcodeMetadataCache: BarcodeMetadataCache,
+    private val barcodeMetadataCache: PuzzleBarcodeRecorder,
     private val analyticsMilestones: AnalyticsMilestones,
-    private val analyticsUserContext: AnalyticsUserContext,
+    private val analyticsUserContext: CollectionAnalyticsSync,
 ) {
     private val undo = MutableStateFlow<CompletionUndoSnapshot?>(null)
     val pendingCompletionUndo: StateFlow<CompletionUndoSnapshot?> = undo
