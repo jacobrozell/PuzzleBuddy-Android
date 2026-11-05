@@ -147,11 +147,11 @@ data class CollectionStats(
                 averageDaysToComplete = averageDays,
                 favoritePuzzleType = favoritePuzzleType(completed),
                 topPurchaseLocations = purchaseLocationCounts(puzzles, limit = 3).map { it.name },
-                completionsThisMonth = completionDates(completed).count { date ->
+                completionsThisMonth = completionDates(puzzles).count { date ->
                     val zoned = date.atZone(zoneId)
                     zoned.year == nowZoned.year && zoned.monthValue == nowZoned.monthValue
                 },
-                completionsThisYear = completionDates(completed).count { date ->
+                completionsThisYear = completionDates(puzzles).count { date ->
                     date.atZone(zoneId).year == nowZoned.year
                 },
                 biggestCompletedPieces = pieceCounts.maxOrNull(),
@@ -166,7 +166,7 @@ data class CollectionStats(
                 averageHoursPer1000Pieces = averageHoursPer1000Pieces(completed),
                 paceBuckets = paceBuckets(completed),
                 purchaseLocationCounts = purchaseLocationCounts(puzzles, limit = 3),
-                completionsByMonthThisYear = monthlyCompletionCounts(completed, nowZoned.year, zoneId),
+                completionsByMonthThisYear = monthlyCompletionCounts(puzzles, nowZoned.year, zoneId),
             )
         }
 
