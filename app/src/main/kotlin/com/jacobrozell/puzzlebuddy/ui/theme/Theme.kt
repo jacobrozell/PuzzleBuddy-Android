@@ -5,11 +5,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 private val Accent = Color(0xFF0E8C9E)
 private val AccentSecondary = Color(0xFF1FB8C6)
 private val AccentWarm = Color(0xFFED731F)
+
+/** Dark teal fill that keeps white text at 7.6:1 (the brand accent alone gives 4.0:1). */
+private val AccentStrong = Color(0xFF055C6B)
 
 private val LightColors = lightColorScheme(
     primary = Accent,
@@ -31,13 +38,56 @@ private val DarkColors = darkColorScheme(
     onSurfaceVariant = Color(0xFF9EA3AB),
 )
 
+/**
+ * Brand colors that change with light and dark mode. Mirrors iOS `Brand` in `DesignTokens.swift`.
+ *
+ * Use [accentText] and [accentWarmText] for text and icons on cards or washed backgrounds: they keep
+ * at least 4.5:1 contrast. Keep [BrandTokens.accent] and [BrandTokens.accentWarm] for fills and washes.
+ */
+@Immutable
+data class BrandColors(
+    val accentText: Color,
+    val accentWarmText: Color,
+    val card: Color,
+    val cardElevated: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
+)
+
+private val LightBrand = BrandColors(
+    accentText = AccentStrong,
+    accentWarmText = Color(0xFF853805),
+    card = Color.White,
+    cardElevated = Color(0xFFEBF2F7),
+    textPrimary = Color(0xFF14171C),
+    textSecondary = Color(0xFF59616B),
+)
+
+private val DarkBrand = BrandColors(
+    accentText = Color(0xFF7AE0EB),
+    accentWarmText = Color(0xFFFAB861),
+    card = Color(0xFF1C1E23),
+    cardElevated = Color(0xFF292B30),
+    textPrimary = Color.White,
+    textSecondary = Color(0xFF9EA3AB),
+)
+
+private val LocalBrandColors = staticCompositionLocalOf { LightBrand }
+
 object BrandTokens {
     val accent = Accent
     val accentSecondary = AccentSecondary
     val accentWarm = AccentWarm
+    val accentStrong = AccentStrong
     val gradientTop = Color(0xFF1A73D9)
     val gradientMid = Color(0xFF1FADD1)
     val gradientBottom = Color(0xFF14948C)
+
+    /** Light- or dark-mode brand colors for the current theme. */
+    val colors: BrandColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalBrandColors.current
 }
 
 @Composable
@@ -45,8 +95,10 @@ fun PuzzleBuddyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        content = content,
-    )
+    CompositionLocalProvider(LocalBrandColors provides if (darkTheme) DarkBrand else LightBrand) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) DarkColors else LightColors,
+            content = content,
+        )
+    }
 }

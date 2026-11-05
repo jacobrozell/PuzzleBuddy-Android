@@ -23,6 +23,9 @@ enum class PuzzleRating(val value: Double) {
     FIVE(5.0),
     ;
 
+    val accessibilityDescription: String
+        get() = if (this == NONE) "No rating" else String.format(java.util.Locale.US, "Rating %.1f out of 5", value)
+
     companion object {
         fun fromValue(value: Double): PuzzleRating =
             entries.firstOrNull { it.value == value } ?: NONE

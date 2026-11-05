@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
-import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListPieceCountFilter
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListEmptyState
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListFilters
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListQuery
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListSortOption
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListStatusFilter
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagCount
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagIndex
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsSessionContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
@@ -21,20 +24,20 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PuzzleListUiState(
     val allPuzzles: List<Puzzle> = emptyList(),
     val displayedPuzzles: List<Puzzle> = emptyList(),
-    val statusFilter: PuzzleListStatusFilter = PuzzleListStatusFilter.ALL,
-    val searchText: String = "",
+    val filters: PuzzleListFilters = PuzzleListFilters(),
     val sortOption: PuzzleListSortOption = PuzzleListSortOption.COMPLETION_DATE,
-    val missingPiecesOnly: Boolean = false,
-    val needsPhotoOnly: Boolean = false,
-    val pieceCountFilter: PuzzleListPieceCountFilter = PuzzleListPieceCountFilter.ANY,
+    val availableTags: List<PuzzleTagCount> = emptyList(),
     val resultCountLabel: String = "",
     val emptyMessage: String = "",
+    val showsAddPuzzleAction: Boolean = false,
+    val pendingDelete: Puzzle? = null,
     val scanAlert: ScanAlert? = null,
 )
 
@@ -48,63 +51,33 @@ class PuzzleListViewModel @Inject constructor(
     private val sessionContext: AnalyticsSessionContext,
 ) : ViewModel() {
     private var didLogListRefresh = false
-    private val statusFilter = MutableStateFlow(PuzzleListStatusFilter.ALL)
-    private val searchText = MutableStateFlow("")
+    private val filters = MutableStateFlow(PuzzleListFilters())
     private val sortOption = MutableStateFlow(PuzzleListSortOption.COMPLETION_DATE)
-    private val missingPiecesOnly = MutableStateFlow(false)
-    private val needsPhotoOnly = MutableStateFlow(false)
-    private val pieceCountFilter = MutableStateFlow(PuzzleListPieceCountFilter.ANY)
+    private val pendingDelete = MutableStateFlow<Puzzle?>(null)
     private val scanAlert = MutableStateFlow<ScanAlert?>(null)
 
     val uiState: StateFlow<PuzzleListUiState> = combine(
         repository.observePuzzles(),
-        statusFilter,
-        searchText,
+        filters,
         sortOption,
-        missingPiecesOnly,
-        needsPhotoOnly,
-        pieceCountFilter,
+        pendingDelete,
         scanAlert,
-    ) { values ->
-        @Suppress("UNCHECKED_CAST")
-        val puzzles = values[0] as List<Puzzle>
-        val status = values[1] as PuzzleListStatusFilter
-        val search = values[2] as String
-        val sort = values[3] as PuzzleListSortOption
-        val missingOnly = values[4] as Boolean
-        val photoOnly = values[5] as Boolean
-        val pieceFilter = values[6] as PuzzleListPieceCountFilter
-        val alert = values[7] as ScanAlert?
-        val displayed = PuzzleListQuery.apply(
-            puzzles = puzzles,
-            statusFilter = status,
-            searchText = search,
-            sortOption = sort,
-            missingPiecesOnly = missingOnly,
-            needsPhotoOnly = photoOnly,
-            pieceCountFilter = pieceFilter,
-        )
+    ) { puzzles, filters, sort, deleting, alert ->
+        val displayed = filters.apply(puzzles, sort)
         PuzzleListUiState(
             allPuzzles = puzzles,
             displayedPuzzles = displayed,
-            statusFilter = status,
-            searchText = search,
+            filters = filters,
             sortOption = sort,
-            missingPiecesOnly = missingOnly,
-            needsPhotoOnly = photoOnly,
-            pieceCountFilter = pieceFilter,
+            availableTags = PuzzleTagIndex.counts(puzzles, limit = Int.MAX_VALUE),
             resultCountLabel = PuzzleListQuery.resultCountLabel(
                 displayedCount = displayed.size,
                 totalCount = puzzles.size,
-                hasActiveFilters = PuzzleListQuery.hasActiveFilters(
-                    statusFilter = status,
-                    searchText = search,
-                    missingPiecesOnly = missingOnly,
-                    needsPhotoOnly = photoOnly,
-                    pieceCountFilter = pieceFilter,
-                ),
+                hasActiveFilters = filters.hasActiveFilters,
             ),
-            emptyMessage = status.emptyStateMessage(PuzzleListQuery.hasActiveSearch(search)),
+            emptyMessage = PuzzleListEmptyState.message(puzzles.size, filters),
+            showsAddPuzzleAction = PuzzleListEmptyState.showsAddPuzzleAction(puzzles.size, filters),
+            pendingDelete = deleting,
             scanAlert = alert,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PuzzleListUiState())
@@ -127,32 +100,40 @@ class PuzzleListViewModel @Inject constructor(
     }
 
     fun setStatusFilter(filter: PuzzleListStatusFilter) {
-        statusFilter.value = filter
+        filters.update { it.copy(status = filter) }
         sortOption.value = PuzzleListSortOption.defaultFor(filter)
     }
 
-    fun setSearchText(text: String) {
-        searchText.value = text
+    fun updateFilters(transform: (PuzzleListFilters) -> PuzzleListFilters) {
+        filters.update(transform)
+    }
+
+    fun clearSecondaryFilters() {
+        filters.update { it.clearingSecondary() }
     }
 
     fun setSortOption(option: PuzzleListSortOption) {
         sortOption.value = option
     }
 
-    fun toggleMissingPiecesOnly() {
-        missingPiecesOnly.value = !missingPiecesOnly.value
+    fun requestDelete(puzzle: Puzzle) {
+        pendingDelete.value = puzzle
     }
 
-    fun toggleNeedsPhotoOnly() {
-        needsPhotoOnly.value = !needsPhotoOnly.value
+    fun cancelDelete() {
+        pendingDelete.value = null
     }
 
-    fun setPieceCountFilter(filter: PuzzleListPieceCountFilter) {
-        pieceCountFilter.value = filter
-    }
-
-    fun deletePuzzle(id: String) {
-        viewModelScope.launch { repository.delete(id) }
+    fun confirmDelete() {
+        val puzzle = pendingDelete.value ?: return
+        pendingDelete.value = null
+        viewModelScope.launch {
+            try {
+                repository.delete(puzzle.id)
+            } catch (error: Exception) {
+                scanAlert.value = ScanAlert("Could not delete puzzle", error.message ?: "Try again.")
+            }
+        }
     }
 
     fun dismissScanAlert() {
