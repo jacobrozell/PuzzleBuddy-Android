@@ -77,7 +77,7 @@ Unit tests cover store logic, migrations, and domain helpers.
 ## Remaining (see PARITY.md)
 
 1. Timer card, completion history, undo banner, stats, pick next, share collage
-2. What's New, Play review prompt, and removing lookup plus import/export from Settings
+2. What's New, Play review prompt, and removing import/export from Settings
 3. UI visual polish and a TalkBack audit
 4. Play Store release pipeline
 
