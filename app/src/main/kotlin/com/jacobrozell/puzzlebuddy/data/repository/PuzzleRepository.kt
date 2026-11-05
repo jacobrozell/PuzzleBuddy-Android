@@ -499,6 +499,9 @@ class PuzzleRepository @Inject constructor(
         return photoStore.read(name)
     }
 
+    /** Bytes of one saved photo, or null when it has no file yet or the file is gone. */
+    suspend fun photoData(photo: PuzzlePhoto): ByteArray? = photo.fileName?.let { photoStore.read(it) }
+
     suspend fun findByBarcode(barcode: String): Puzzle? {
         val normalized = BarcodeValidator.normalizeOrNull(barcode) ?: return null
         return allPuzzles().firstOrNull { puzzle ->
