@@ -9,13 +9,13 @@ Plans and projects **in implementation** — approved, specced, and actively bei
 | Ship blockers / release train | [`docs/release/`](../docs/release/) |
 | Shipped behavior | [`specs/`](../specs/) + [`docs/feature-inventory.md`](../docs/feature-inventory.md) |
 
-**Last updated:** 2026-11-05
+**Last updated:** 2026-11-06
 
 ## Active
 
 | Plan | Doc | Status | Notes |
 |------|-----|--------|-------|
-| 1.1.0 review-lane fixes | [`1.1.0-review-fixes.md`](1.1.0-review-fixes.md) | In progress | `claude/pensive-knuth-liq0g4` vs `main`. Bugbot, Security, and Tests running. |
+| 1.1.0 review-lane fixes | [`1.1.0-review-fixes.md`](1.1.0-review-fixes.md) | In progress | Demo-load barcode fix is in. Security had no code change. |
 
 Status vocabulary: **In progress** · **Approved — not started** · **Partial — QA pending** · **Blocked**
 
