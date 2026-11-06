@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.barcode
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
@@ -7,6 +8,7 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import com.jacobrozell.puzzlebuddy.support.review.StoreReviewPrompt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +21,12 @@ import javax.inject.Inject
 class ShoppingModeViewModel @Inject constructor(
     private val repository: PuzzleRepository,
     private val logger: AppLogger,
+    private val reviewPrompt: StoreReviewPrompt,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ShoppingModeState())
     val state: StateFlow<ShoppingModeState> = _state.asStateFlow()
 
-    fun handleScan(raw: String) {
+    fun handleScan(raw: String, activity: Activity?) {
         if (_state.value.result != null) return
         viewModelScope.launch {
             val normalized = BarcodeValidator.normalizeOrNull(raw) ?: return@launch
@@ -43,6 +46,7 @@ class ShoppingModeViewModel @Inject constructor(
                         "scan_result" to "match",
                     ),
                 )
+                if (activity != null) reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.BARCODE_SCAN)
                 ShoppingScanResult.Match(match)
             } else {
                 logger.info(
@@ -59,6 +63,7 @@ class ShoppingModeViewModel @Inject constructor(
                         "scan_result" to "no_match",
                     ),
                 )
+                if (activity != null) reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.BARCODE_SCAN)
                 ShoppingScanResult.NoMatch(normalized)
             }
             _state.update {

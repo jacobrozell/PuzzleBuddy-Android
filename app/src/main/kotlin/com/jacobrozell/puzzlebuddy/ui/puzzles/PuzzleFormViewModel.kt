@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
+import android.app.Activity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleSimilarMatchFinder
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagIndex
 import com.jacobrozell.puzzlebuddy.domain.loan.PuzzleLoanSemantics
 import com.jacobrozell.puzzlebuddy.domain.model.BarcodeNormalizer
+import com.jacobrozell.puzzlebuddy.support.review.StoreReviewPrompt
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleCutType
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleDifficulty
@@ -91,6 +93,7 @@ class PuzzleFormViewModel @Inject constructor(
     val repository: PuzzleRepository,
     private val barcodeMetadataCache: BarcodeMetadataCache,
     private val clock: Clock,
+    private val reviewPrompt: StoreReviewPrompt,
 ) : ViewModel() {
     private val puzzleId: String? = savedStateHandle.get<String>("id")?.takeIf { it.isNotBlank() && it != "new" }
     private val initialBarcode: String? = savedStateHandle.get<String>("barcode")?.takeIf { it.isNotBlank() }
@@ -174,6 +177,16 @@ class PuzzleFormViewModel @Inject constructor(
         val digits = raw.filter(Char::isDigit).take(14)
         it.copy(barcode = digits.ifEmpty { null })
     }
+
+    fun applyScannedBarcode(raw: String, activity: Activity?) {
+        val normalized = BarcodeNormalizer.normalize(raw)
+        if (normalized != null) {
+            update { it.copy(barcode = normalized) }
+            if (activity != null) reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.BARCODE_SCAN)
+        } else {
+            updateBarcode(raw)
+        }
+    }
     fun updateHasMissingPieces(value: Boolean) = update { it.copy(hasMissingPieces = value) }
     fun updateTags(tags: List<String>) = update { it.copy(tags = tags) }
     fun updatePurchaseLocation(value: String) = update { it.copy(purchaseLocation = value.take(200)) }
@@ -241,7 +254,7 @@ class PuzzleFormViewModel @Inject constructor(
 
     fun dismissSaveError() = _uiState.update { it.copy(saveError = null) }
 
-    fun save(onSaved: () -> Unit) {
+    fun save(activity: Activity?, onSaved: () -> Unit) {
         val state = _uiState.value
         if (!state.canSave) return
         val draft = cleaned(state.puzzle)
@@ -258,6 +271,9 @@ class PuzzleFormViewModel @Inject constructor(
                     repository.update(draft, state.pendingPhotoBytes)
                 }
                 _uiState.update { it.copy(isSaving = false, isDirty = false) }
+                if (!isNew && !draft.isDemo && activity != null) {
+                    reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.PUZZLE_EDITED)
+                }
                 onSaved()
             } catch (error: PuzzleStoreException) {
                 _uiState.update { it.copy(isSaving = false, saveError = error.message) }

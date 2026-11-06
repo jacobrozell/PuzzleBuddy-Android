@@ -131,7 +131,7 @@ fun SettingsScreen(
                             onDeleteAll = { confirm = SettingsConfirm.DELETE_ALL },
                         )
                     }
-                    item { HelpSection(context) }
+                    item { HelpSection(context, onWriteReview = viewModel::recordReviewLinkOpened) }
                     item {
                         AboutSection(state) {
                             viewModel.replayOnboarding()
@@ -206,10 +206,13 @@ private fun CollectionSection(
 }
 
 @Composable
-private fun HelpSection(context: Context) {
+private fun HelpSection(context: Context, onWriteReview: () -> Unit) {
     SectionHeader("Help & Legal")
     if (ProductSurface.isPlayListingLive) {
-        LinkRow("Write a Review") { openPlayListing(context) }
+        LinkRow("Write a Review") {
+            onWriteReview()
+            openPlayListing(context)
+        }
     }
     LinkRow("Privacy Policy") { openUrl(context, AppLinks.privacyPolicy) }
     LinkRow("Support") { openUrl(context, AppLinks.support) }

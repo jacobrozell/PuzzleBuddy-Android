@@ -1,6 +1,7 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
 import android.Manifest
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -221,7 +222,7 @@ fun PuzzleListScreen(
                 onDismiss = { showScanner = false },
                 onBarcodeScanned = { raw ->
                     showScanner = false
-                    viewModel.handleScannedBarcode(raw, onQuickAdd = onQuickAdd)
+                    viewModel.handleScannedBarcode(raw, context as? Activity, onQuickAdd = onQuickAdd)
                 },
             )
         }

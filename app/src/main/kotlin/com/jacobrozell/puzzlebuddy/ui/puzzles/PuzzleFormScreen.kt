@@ -1,6 +1,7 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
 import android.Manifest
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +46,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -98,6 +100,7 @@ fun PuzzleFormScreen(
     viewModel: PuzzleFormViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val isNew = puzzleId == null
     var showScanner by remember { mutableStateOf(false) }
     var confirmDiscard by remember { mutableStateOf(false) }
@@ -141,7 +144,7 @@ fun PuzzleFormScreen(
                 onDismiss = { showScanner = false },
                 onBarcodeScanned = { raw ->
                     showScanner = false
-                    viewModel.updateBarcode(raw)
+                    viewModel.applyScannedBarcode(raw, context as? Activity)
                 },
             )
         }
@@ -160,7 +163,7 @@ fun PuzzleFormScreen(
             if (!state.missingPuzzle) {
                 Surface(tonalElevation = 3.dp, modifier = Modifier.imePadding()) {
                     Button(
-                        onClick = { viewModel.save(onFinished) },
+                        onClick = { viewModel.save(context as? Activity, onFinished) },
                         enabled = state.canSave,
                         modifier = Modifier
                             .fillMaxWidth()

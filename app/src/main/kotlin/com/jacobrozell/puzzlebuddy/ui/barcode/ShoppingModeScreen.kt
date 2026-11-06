@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.barcode
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -56,6 +58,7 @@ fun ShoppingModeScreen(
     viewModel: ShoppingModeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var scannerKey by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -71,7 +74,10 @@ fun ShoppingModeScreen(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (state.result == null) {
                 key(scannerKey) {
-                    BarcodeScannerContent(onBarcodeScanned = viewModel::handleScan, modifier = Modifier.fillMaxSize())
+                    BarcodeScannerContent(
+                        onBarcodeScanned = { raw -> viewModel.handleScan(raw, context as? Activity) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 }
             }
             if (state.scansTotal > 0) {

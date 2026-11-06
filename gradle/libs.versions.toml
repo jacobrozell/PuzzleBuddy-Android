@@ -20,6 +20,7 @@ androidxJunit = "1.2.1"
 espresso = "3.6.1"
 ksp = "2.1.10-1.0.31"
 firebaseBom = "33.13.0"
+playReview = "2.0.2"
 googleServices = "4.4.2"
 firebaseCrashlyticsGradle = "3.0.3"
 
@@ -58,6 +59,7 @@ androidx-espresso = { module = "androidx.test.espresso:espresso-core", version.r
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+play-review = { module = "com.google.android.play:review-ktx", version.ref = "playReview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

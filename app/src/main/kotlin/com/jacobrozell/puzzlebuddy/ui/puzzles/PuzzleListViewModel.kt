@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,7 @@ import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAnalyticsMetadata
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import com.jacobrozell.puzzlebuddy.support.review.StoreReviewPrompt
 import com.jacobrozell.puzzlebuddy.support.share.PuzzleCollectionSharer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +56,7 @@ data class ScanAlert(val title: String, val message: String)
 class PuzzleListViewModel @Inject constructor(
     val repository: PuzzleRepository,
     private val logger: AppLogger,
+    private val reviewPrompt: StoreReviewPrompt,
     private val barcodeMetadataCache: BarcodeMetadataCache,
     private val sessionContext: AnalyticsSessionContext,
     private val storeNotices: StoreNotices,
@@ -158,7 +161,7 @@ class PuzzleListViewModel @Inject constructor(
         scanMatch.value = null
     }
 
-    fun handleScannedBarcode(raw: String, onQuickAdd: (QuickAddRequest) -> Unit) {
+    fun handleScannedBarcode(raw: String, activity: Activity?, onQuickAdd: (QuickAddRequest) -> Unit) {
         viewModelScope.launch {
             val normalized = BarcodeValidator.normalizeOrNull(raw)
             if (normalized == null) {
@@ -180,6 +183,7 @@ class PuzzleListViewModel @Inject constructor(
                     ),
                 )
                 scanMatch.value = duplicate
+                if (activity != null) reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.BARCODE_SCAN)
                 return@launch
             }
             val metadata = barcodeMetadataCache.metadataFor(normalized)
@@ -192,6 +196,7 @@ class PuzzleListViewModel @Inject constructor(
                     "scan_result" to "no_match",
                 ),
             )
+            if (activity != null) reviewPrompt.requestIfEligible(activity, StoreReviewPrompt.Reason.BARCODE_SCAN)
             onQuickAdd(
                 QuickAddRequest(
                     barcode = normalized,

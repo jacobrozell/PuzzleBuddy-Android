@@ -6,6 +6,7 @@ import com.jacobrozell.puzzlebuddy.data.prefs.AppPreferencesStore
 import com.jacobrozell.puzzlebuddy.data.prefs.OnboardingStore
 import com.jacobrozell.puzzlebuddy.data.repository.FriendRepository
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
+import com.jacobrozell.puzzlebuddy.support.review.StoreReviewPrompt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +37,7 @@ class SettingsViewModel @Inject constructor(
     friendRepository: FriendRepository,
     private val appPreferences: AppPreferencesStore,
     private val onboardingStore: OnboardingStore,
+    private val reviewPrompt: StoreReviewPrompt,
 ) : ViewModel() {
     private val busy = MutableStateFlow(false)
     private val error = MutableStateFlow<SettingsError?>(null)
@@ -59,6 +61,10 @@ class SettingsViewModel @Inject constructor(
 
     fun setAppearance(mode: String) {
         viewModelScope.launch { appPreferences.setAppearanceMode(mode) }
+    }
+
+    fun recordReviewLinkOpened() {
+        reviewPrompt.recordSettingsLinkOpened()
     }
 
     fun replayOnboarding() {
