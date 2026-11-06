@@ -3,6 +3,7 @@ package com.jacobrozell.puzzlebuddy.domain.catalog
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleTime
+import com.jacobrozell.puzzlebuddy.support.logging.InMemoryAnalyticsKeyValueStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -77,7 +78,7 @@ class MetricsMilestonesAndPickerTest {
         )
     }
 
-    // CollectionMilestonesTests (acknowledgement storage and demo exclusion are not ported yet; see WP4.6)
+    // CollectionMilestonesTests
 
     @Test
     fun firstCompletionMilestone() {
@@ -113,6 +114,24 @@ class MetricsMilestonesAndPickerTest {
         }
         val yearStats = CollectionStats.compute(puzzles, ZoneOffset.UTC, Instant.parse("2026-06-01T00:00:00Z"))
         assertTrue(CollectionMilestones.earned(yearStats).any { it.id == "year_completions_12" })
+    }
+
+    @Test
+    fun acknowledgePersists() {
+        val store = InMemoryAnalyticsKeyValueStore()
+        val updated = CollectionMilestones.acknowledge(
+            store.getStringSet(CollectionMilestones.STORAGE_KEY),
+            "completed_10",
+        )
+        store.putStringSet(CollectionMilestones.STORAGE_KEY, updated)
+        assertTrue(store.getStringSet(CollectionMilestones.STORAGE_KEY).contains("completed_10"))
+    }
+
+    @Test
+    fun excludingDemoDoesNotChangeThresholdIDs() {
+        val demo = puzzle("Demo", PuzzleStatus.COMPLETED).copy(isDemo = true)
+        val earned = CollectionMilestones.earned(stats(listOf(demo)), excludingDemo = true)
+        assertTrue(earned.any { it.id == "completed_1" })
     }
 
     // PuzzleRandomPickerTests

@@ -122,7 +122,9 @@ fun PuzzleBuddyNavHost(onReplayOnboarding: () -> Unit = {}) {
                     )
                 }
                 composable(RootTab.STATS.route) {
-                    CollectionStatsScreen()
+                    CollectionStatsScreen(
+                        onOpenPuzzle = { id -> navController.navigate("puzzle/$id") },
+                    )
                 }
                 composable(RootTab.SETTINGS.route) {
                     SettingsScreen(onReplayOnboarding = onReplayOnboarding)

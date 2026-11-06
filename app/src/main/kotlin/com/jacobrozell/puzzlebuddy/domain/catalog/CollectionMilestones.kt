@@ -17,10 +17,15 @@ object CollectionMilestones {
     fun newlyEarned(
         stats: CollectionStats,
         previouslyAcknowledged: Set<String>,
+        excludingDemo: Boolean = true,
     ): List<CollectionMilestone> =
-        earned(stats).filter { it.id !in previouslyAcknowledged }
+        earned(stats, excludingDemo).filter { it.id !in previouslyAcknowledged }
 
-    fun earned(stats: CollectionStats): List<CollectionMilestone> = buildList {
+    fun acknowledge(existing: Set<String>, milestoneId: String): Set<String> = existing + milestoneId
+
+    /** [excludingDemo] matches the iOS signature. It does not change which thresholds are earned. */
+    @Suppress("UNUSED_PARAMETER")
+    fun earned(stats: CollectionStats, excludingDemo: Boolean = true): List<CollectionMilestone> = buildList {
         if (stats.completedCount >= 1) {
             add(
                 CollectionMilestone(
