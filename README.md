@@ -9,9 +9,9 @@ Native Android port of [Puzzle Buddy](https://github.com/jacobrozell/PuzzleBuddy
 
 ---
 
-## Status (2026-10-28)
+## Status (2026-11-06)
 
-**In progress** on `claude/pensive-knuth-liq0g4`. The iOS 1.1 model, Room v2, and repository are in: five statuses, metadata, photo files, completion logs, on loan, the timer commands, and a 13-puzzle demo catalog. The list, form, and detail show those fields. The timer card, history editor, stats rewrite, and the rest of the 1.1 UI are still open. Repo version is still 1.0.0 (1).
+**In progress** on `claude/pensive-knuth-liq0g4`. Version **1.1.0 (2)**. The 1.1 catalog UI is in: history, undo, timer, pick next, stats, share, What's New, and the Play review prompt. Online barcode lookup and Settings import/export are gone, matching iOS. The JSON backup format matches iOS and has no Settings screen. Detail: [`STATUS.md`](STATUS.md).
 
 Firebase Analytics and Crashlytics turn on when `google-services.json` is real. Detail: [`STATUS.md`](STATUS.md).
 
@@ -63,10 +63,10 @@ Package: `com.jacobrozell.puzzlebuddy` · Implementation specs: [`specs/README.m
 | Area | Highlights |
 |------|------------|
 | **Catalog** | Five statuses, metadata, piece count, rating, difficulty, tags |
-| **Photos** | Up to five JPEG files on disk; the form still attaches one |
-| **List & detail** | Status segments, loan and timer badges, detail rows for the new fields |
-| **Collection** | Completions, on loan, and the stopwatch are stored; history and timer UI are next |
-| **Settings** | Appearance, demo data (13 puzzles), legal links. Import/export UI is still here and comes out with the 1.1 settings pass |
+| **Photos** | Up to five JPEG files on disk |
+| **List & detail** | History, undo, timer card, loan, and the rest of the 1.1 fields |
+| **Collection** | Pick next, stats, and a share collage |
+| **Settings** | Appearance, demo data, legal links, Delete All Data. No import/export screen |
 | **Firebase** | Analytics + Crashlytics when real `google-services.json` present |
 | **Offline** | Local-first — no login or cloud sync |
 
@@ -76,10 +76,8 @@ Unit tests cover store logic, migrations, and domain helpers.
 
 ## Remaining (see PARITY.md)
 
-1. Timer card, completion history, undo banner, stats, pick next, share collage
-2. What's New, Play review prompt, and removing import/export from Settings
-3. UI visual polish and a TalkBack audit
-4. Play Store release pipeline
+1. TalkBack audit, tablet pass, and photo/camera checks on a device
+2. Play Store release pipeline (`isPlayListingLive` stays off)
 
 ---
 

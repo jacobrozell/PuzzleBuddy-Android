@@ -1,6 +1,6 @@
 # Specs index
 
-**Last updated:** 2026-10-28
+**Last updated:** 2026-11-06
 
 Two-layer spec system: **iOS behavior is canonical**; Android specs describe implementation.
 
@@ -9,7 +9,7 @@ Two-layer spec system: **iOS behavior is canonical**; Android specs describe imp
 | [`../../PuzzleBuddy/specs/features/local-catalog.md`](../../PuzzleBuddy/specs/features/local-catalog.md) | `domain/catalog/*`, `data/local/*`, `ui/puzzles/*` |
 | [`../../PuzzleBuddy/docs/features.md`](../../PuzzleBuddy/docs/features.md) | `PARITY.md` rows |
 | [`../../PuzzleBuddy/specs/features/barcode-quick-add.md`](../../PuzzleBuddy/specs/features/barcode-quick-add.md) | ✅ scan, shopping mode, and quick add (`ui/barcode/*`) |
-| [`../../PuzzleBuddy/specs/planned/in-app-timer.md`](../../PuzzleBuddy/specs/planned/in-app-timer.md) | 🟡 `domain/timer` + repository; timer card not built |
+| [`../../PuzzleBuddy/specs/planned/in-app-timer.md`](../../PuzzleBuddy/specs/planned/in-app-timer.md) | ✅ timer card on detail |
 | [`../../PuzzleBuddy/specs/planned/auth-cloud-sync.md`](../../PuzzleBuddy/specs/planned/auth-cloud-sync.md) | 🚫 off |
 | [`../docs/implementation/1.1.0-ios-parity-plan.md`](../docs/implementation/1.1.0-ios-parity-plan.md) | Active 1.1 port |
 

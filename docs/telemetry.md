@@ -14,9 +14,9 @@ When changing Analytics, Crashlytics, or `eventName` strings, update **both** re
 
 ## 1.1.0 depth (allowlist + live call sites)
 
-**Last updated:** 2026-10-28
+**Last updated:** 2026-11-06
 
-Android allowlists match iOS tag `1.1.0` (`FirebaseAnalyticsEventMapping`, `AnalyticsMetadataKeys`). Work is on `claude/pensive-knuth-liq0g4`. The app version is still 1.0.0 (1).
+Android allowlists match iOS tag `1.1.0`. The app version is 1.1.0 (2). Call sites were checked against the Phase 6 table on 2026-11-06.
 
 **Live on Android today**
 
@@ -27,14 +27,14 @@ Android allowlists match iOS tag `1.1.0` (`FirebaseAnalyticsEventMapping`, `Anal
 | `AnalyticsMilestones` | After add / complete / collection change |
 | `count_wishlist` / `count_abandoned` | Real counts from puzzle status |
 | `puzzle_completion_recorded` | Real completion number from `appendCompletion` |
-| `puzzle_completion_deleted` / `updated` / `undone` | Repository methods. No history UI yet. |
-| `puzzle_timer_started` / `puzzle_timer_paused` | Repository timer commands. No timer card yet. |
-| `puzzle_redo_started`, `puzzle_marked_on_loan`, `puzzle_marked_returned` | Repository. Loan UI can mark a loan; redo and return have no buttons yet. |
+| `puzzle_completion_deleted` / `updated` / `undone` | History editor and the undo banner |
+| `puzzle_timer_started` / `puzzle_timer_paused` | Timer card and status changes |
+| `puzzle_redo_started`, `puzzle_marked_on_loan`, `puzzle_marked_returned` | Puzzle again, loan form, Mark returned |
+| `whats_new_shown` / `whats_new_dismissed` | What's New sheet |
+| `pick_next_puzzle_selected` | Pick next on the list and Stats |
+| `store_review_requested` / `store_review_link_opened` | Log only. Not on the Firebase allowlist, same as iOS |
 | `model_container_load_failed`, `model_container_reset_failed`, `model_container_ephemeral_fallback`, `model_container_store_reset` | Database factory |
 
-**Allowlisted, no Android call site yet**
+**Allowlisted, no Android call site**
 
-- `whats_new_shown` / `whats_new_dismissed`
-- `pick_next_puzzle_selected`
-- `puzzle_backup_restored`
-- `store_review_requested` / `store_review_link_opened` (log-only)
+- `puzzle_backup_restored` — restore UI is not in 1.1, same as iOS Settings

@@ -2,14 +2,14 @@
 
 > **Parity tracker:** [`PARITY.md`](PARITY.md)  
 > **Plan:** [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md) (order of work) · [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md) (WP detail)  
-> **Last updated:** 2026-11-05
+> **Last updated:** 2026-11-06
 
 ## Summary
 
 | Field | Value |
 |-------|-------|
-| **Completion** | M0–M3 of the catch-up plan are done, through What's New and the Play review prompt. M4 (telemetry audit, version 1.1.0, JSON backup) is next. |
-| **Version** | 1.0.0 (1). Plan calls for 1.1.0 (2) after the UI work. |
+| **Completion** | M0–M4 are done: 1.1 UI, telemetry call sites, version 1.1.0 (2), and the JSON backup format. M5 is the emulator pass and the final report. |
+| **Version** | 1.1.0 (2) |
 | **applicationId** | `com.jacobrozell.puzzlebuddy` |
 | **minSdk / targetSdk** | 28 / 36 |
 | **Stack** | Kotlin · Compose · Hilt · Room v2 · DataStore · CameraX · ML Kit · Firebase |
@@ -24,7 +24,7 @@ cp app/google-services.json.example app/google-services.json   # CI does this au
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-`testDebugUnitTest assembleDebug` passed on 2026-11-05 (253 tests). M2 and M3 screens were checked on the Medium Phone API 36.1 emulator. Not checked: photo picking, camera scanning, tablet, TalkBack, 150% font on the M3 screens, and the Play review dialog.
+`testDebugUnitTest assembleDebug` passed on 2026-11-06 (262 tests). M2 and M3 screens were checked on the Medium Phone API 36.1 emulator. M5 checks are in `docs/implementation/1.1.0-catch-up.md`.
 
 ## Firebase setup
 
@@ -40,5 +40,5 @@ CI checks the allowlist against iOS tag `1.1.0`. Bump the `ref` in `.github/work
 
 ## Top remaining gaps
 
-1. M4: telemetry call-site audit, version 1.1.0 (2), JSON backup parity
-2. M5: emulator pass (tablet, foldable, TalkBack, large text, camera, photo picking)
+1. M5 emulator pass: tablet, TalkBack, large text, camera, and photo picking
+2. Play listing stays off (`isPlayListingLive = false`). There is no Settings import/export screen. `puzzle_backup_restored` has no call site until a restore UI exists.

@@ -5,8 +5,8 @@
 
 **Target:** iOS tag `1.1.0` (shipped 2026-11-02)  
 **Android branch:** `claude/pensive-knuth-liq0g4`  
-**Repo version:** 1.0.0 (1) — not bumped yet  
-**Last updated:** 2026-11-05
+**Repo version:** 1.1.0 (2)  
+**Last updated:** 2026-11-06
 
 ## Legend
 
@@ -33,7 +33,7 @@
 | Share collage | ✅ list overflow and Stats |
 | Demo catalog (13 puzzles, covers, Paris on loan, Floral Arch ×2) | ✅ emulator-checked 2026-11-05 |
 | Online barcode lookup (UPCitemdb) | ✅ removed, as on iOS. Quick add prefills from saved puzzles only. |
-| Settings import / export | ✅ UI removed, as on iOS; helpers still build |
+| Settings import / export | 🚫 UI removed on iOS 1.1. JSON backup format matches; there is no import/export screen |
 | Write a Review + in-app review prompt | 🟡 prompt wired after a scan or a non-demo edit; Settings row still behind `isPlayListingLive` (off) |
 | What's New | ✅ 1.1 notes, without the iPhone Duo item |
 | Store-reset and ephemeral banners | ✅ |
@@ -62,6 +62,7 @@
 | What's New 1.1 | ✅ | ✅ without the iPhone Duo item |
 | Play / App Store review prompt | ✅ | 🟡 once after a scan or non-demo edit; Settings row hidden |
 | Demo data, 13 puzzles | ✅ | ✅ |
+| JSON backup format | ✅ | ✅ format only; no Settings UI |
 
 ## Still the 1.0 shell
 
@@ -71,15 +72,15 @@
 | Search, sort, swipe delete, tags, half-star rating | ✅ |
 | Barcode scan + shopping mode | ✅ |
 | Barcode field on the form | ✅ |
-| UPC barcode lookup | ✅ removed (WP3.8) |
-| IPDb CSV import and collection export in Settings | ✅ UI removed (WP4.9) |
+| UPC barcode lookup | 🚫 removed on iOS 1.1 |
+| IPDb CSV import and collection export in Settings | 🚫 removed on iOS 1.1 |
 | Privacy, support, accessibility links | ✅ |
 | Firebase Analytics + Crashlytics breadcrumbs | ✅ |
 | Design tokens / brand background | ✅ contrast-safe text tokens, teal containers in both themes |
 | TalkBack audit | 🟡 |
 | Login / cloud sync | 🚫 off |
 
-CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. Bump it when Android targets the next iOS tag.
+CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. iOS `1.1.0` is already on `main`. Remove that `ref:` pin once CI should follow iOS `main` again.
 
 ## Session log
 
@@ -95,3 +96,4 @@ CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. Bump it w
 | 2026-11-05 | M1 done: stats count finish logs after Puzzle again (iOS #44), `PuzzleCompletion.ratingLabel`, 48 ported store tests on in-memory DAOs with rollback, ported iOS domain tests (stats, list filters, timer, photos, history, undo, metrics, milestones, picker, share, loans, demo, enums), and UPCitemdb removed. 224 unit tests green. |
 | 2026-11-05 | M2 done: list (filters, sort, rows, empty states, delete confirm), five-photo form, detail, barcode/quick add/shopping, Settings, onboarding copy, storage banners, contrast tokens. Fixed: form text fields losing focus when the keyboard opened, stale detail after edit, spaces dropped while typing brand/store/notes. Emulator-checked on a phone in light, dark, and 150% font. 239 unit tests green. |
 | 2026-11-05 | M3 done: history, undo, timer card, pick next, stats, share collage, What's New (no iPhone Duo), Play review prompt. Phone emulator in light, and dark for stats. 253 unit tests green. |
+| 2026-11-06 | M4 done: telemetry call sites, version 1.1.0 (2), product flags, JSON backup format (no Settings UI). |

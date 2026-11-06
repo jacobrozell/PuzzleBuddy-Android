@@ -1,6 +1,6 @@
 # Room migrations
 
-**Last updated:** 2026-10-28
+**Last updated:** 2026-11-06
 
 v2 is the first schema meant to ship. Nothing has shipped to Play, so a v1 dev install may still be wiped. It stores puzzles, photos (file names only), completion logs, and friends.
 
