@@ -12,6 +12,9 @@ object ProductSurface {
     val isShoppingModeEnabled: Boolean = true
     val isIPDbImportEnabled: Boolean = true
 
+    /** Off until the Play listing exists; a dead store link fails review. Gates Write a Review. */
+    val isPlayListingLive: Boolean = false
+
     val rootTabs: List<RootTab> = listOf(RootTab.PUZZLES, RootTab.STATS, RootTab.SETTINGS)
 }
 
