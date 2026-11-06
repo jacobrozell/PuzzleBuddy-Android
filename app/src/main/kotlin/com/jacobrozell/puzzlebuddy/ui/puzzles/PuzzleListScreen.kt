@@ -108,6 +108,8 @@ import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingScanResult
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeScreen
 import com.jacobrozell.puzzlebuddy.ui.components.BrandFilterChip
 import com.jacobrozell.puzzlebuddy.ui.components.ChipTone
+import com.jacobrozell.puzzlebuddy.ui.components.PickerField
+import androidx.compose.ui.platform.LocalDensity
 import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveLayout
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
@@ -372,19 +374,30 @@ private fun FilterHeader(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { contentDescription = "Filter puzzles by status" },
-        ) {
-            PuzzleListStatusFilter.entries.forEachIndexed { index, filter ->
-                SegmentedButton(
-                    selected = filters.status == filter,
-                    onClick = { viewModel.setStatusFilter(filter) },
-                    shape = SegmentedButtonDefaults.itemShape(index, PuzzleListStatusFilter.entries.size),
-                    icon = {},
-                ) {
-                    Text(filter.title, maxLines = 1, style = MaterialTheme.typography.labelMedium)
+        // Six segments truncate at large font scale; use a menu there, like iOS splitStatusMenuPicker.
+        if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) {
+            PickerField(
+                label = "Filter puzzles by status",
+                options = PuzzleListStatusFilter.entries,
+                selected = filters.status,
+                labelFor = { it.title },
+                onSelected = viewModel::setStatusFilter,
+            )
+        } else {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = "Filter puzzles by status" },
+            ) {
+                PuzzleListStatusFilter.entries.forEachIndexed { index, filter ->
+                    SegmentedButton(
+                        selected = filters.status == filter,
+                        onClick = { viewModel.setStatusFilter(filter) },
+                        shape = SegmentedButtonDefaults.itemShape(index, PuzzleListStatusFilter.entries.size),
+                        icon = {},
+                    ) {
+                        Text(filter.title, maxLines = 1, style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
         }
