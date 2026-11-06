@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.ImageNotSupported
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.MoreTime
@@ -110,10 +111,12 @@ import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeScreen
 import com.jacobrozell.puzzlebuddy.ui.components.BrandFilterChip
 import com.jacobrozell.puzzlebuddy.ui.components.ChipTone
 import com.jacobrozell.puzzlebuddy.ui.components.PickerField
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveLayout
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
 import com.jacobrozell.puzzlebuddy.ui.picknext.PickNextSheet
+import com.jacobrozell.puzzlebuddy.ui.share.PuzzleShareMenu
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 import java.time.Instant
 
@@ -126,6 +129,7 @@ fun PuzzleListScreen(
     viewModel: PuzzleListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val storeNotice by viewModel.storeNotice.collectAsStateWithLifecycle()
     var showScanner by remember { mutableStateOf(false) }
     var showPickNext by remember { mutableStateOf(false) }
@@ -255,6 +259,12 @@ fun PuzzleListScreen(
                         }
                     }
                     SortMenu(selected = state.sortOption, onSelect = viewModel::setSortOption)
+                    PuzzleShareMenu(
+                        entireCollection = state.allPuzzles,
+                        visibleList = state.displayedPuzzles,
+                        imageVector = Icons.Filled.MoreVert,
+                        onShare = { puzzles -> viewModel.share(context, puzzles) },
+                    )
                 },
             )
         },

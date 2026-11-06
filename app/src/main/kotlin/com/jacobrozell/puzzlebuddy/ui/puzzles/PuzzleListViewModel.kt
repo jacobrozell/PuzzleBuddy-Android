@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
@@ -21,6 +22,7 @@ import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAnalyticsMetadata
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import com.jacobrozell.puzzlebuddy.support.share.PuzzleCollectionSharer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -198,6 +200,12 @@ class PuzzleListViewModel @Inject constructor(
                     source = metadata?.brand,
                 ),
             )
+        }
+    }
+
+    fun share(context: Context, puzzles: List<Puzzle>) {
+        viewModelScope.launch {
+            PuzzleCollectionSharer.share(context, repository, puzzles)
         }
     }
 

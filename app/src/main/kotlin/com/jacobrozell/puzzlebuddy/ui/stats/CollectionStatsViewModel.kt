@@ -1,5 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.stats
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
@@ -14,12 +15,14 @@ import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.PuzzleAnalyticsMetadata
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import com.jacobrozell.puzzlebuddy.support.share.PuzzleCollectionSharer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CollectionStatsUiState(
@@ -30,7 +33,7 @@ data class CollectionStatsUiState(
 
 @HiltViewModel
 class CollectionStatsViewModel @Inject constructor(
-    repository: PuzzleRepository,
+    private val repository: PuzzleRepository,
     private val store: AnalyticsKeyValueStore,
     private val analyticsMilestones: AnalyticsMilestones,
     private val logger: AppLogger,
@@ -64,6 +67,12 @@ class CollectionStatsViewModel @Inject constructor(
 
     fun onMilestoneShown(milestoneId: String) {
         analyticsMilestones.logIfNeeded(milestoneId)
+    }
+
+    fun share(context: Context, puzzles: List<Puzzle>) {
+        viewModelScope.launch {
+            PuzzleCollectionSharer.share(context, repository, puzzles)
+        }
     }
 
     fun logPickNextSelected(pieceCount: PuzzleListPieceCountFilter) {

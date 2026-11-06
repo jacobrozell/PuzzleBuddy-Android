@@ -12,11 +12,13 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleCutType
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleShape
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.share.PuzzleCollectionCollageLayout
+import com.jacobrozell.puzzlebuddy.domain.share.PuzzleCollectionShare
 import com.jacobrozell.puzzlebuddy.domain.share.PuzzleShareSummary
 import com.jacobrozell.puzzlebuddy.domain.surface.AppLinks
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
@@ -25,7 +27,7 @@ import java.time.ZoneOffset
 /**
  * Ports iOS `PuzzleShareTests`, `PuzzleSimilarMatchFinderTests`, `DemoDataCatalogTests`,
  * `PuzzleMetadataEnumsTests`, and the pure parts of `PuzzleLoanAndFriendTests` (tag 1.1.0).
- * Collage rendering and share payload tests wait for WP4.7.
+ * Collage pixels stay on the Android canvas. The payload tests cover the JVM-visible result.
  */
 class ShareLoanDemoAndEnumsTest {
     private val zone = ZoneOffset.UTC
@@ -56,6 +58,17 @@ class ShareLoanDemoAndEnumsTest {
         assertTrue(summary.contains("1 completed"))
         assertTrue(summary.contains("1 in progress"))
         assertTrue(summary.contains("A"))
+    }
+
+    @Test
+    fun makeCaptionReturnsNullForEmptyCollection() {
+        assertNull(PuzzleCollectionShare.makeCaption(emptyList()))
+    }
+
+    @Test
+    fun makeCaptionBuildsNonEmptyCaption() {
+        val caption = PuzzleCollectionShare.makeCaption(listOf(fixture("Galaxy", status = PuzzleStatus.COMPLETED)))
+        assertFalse(caption.isNullOrEmpty())
     }
 
     @Test

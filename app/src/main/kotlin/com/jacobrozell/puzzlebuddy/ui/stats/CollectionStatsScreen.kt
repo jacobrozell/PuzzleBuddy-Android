@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -68,6 +69,7 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagIndex
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
 import com.jacobrozell.puzzlebuddy.ui.picknext.PickNextSheet
+import com.jacobrozell.puzzlebuddy.ui.share.PuzzleShareMenu
 import com.jacobrozell.puzzlebuddy.ui.puzzles.LARGE_FONT_SCALE
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 import java.time.LocalDate
@@ -91,8 +93,8 @@ fun CollectionStatsScreen(
     }
     var selectedYear by rememberSaveable { mutableIntStateOf(currentYear) }
     var showPickNext by remember { mutableStateOf(false) }
-    var shareMenu by remember { mutableStateOf(false) }
     var yearMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     var bannerDismissed by remember { mutableStateOf(false) }
     LaunchedEffect(years) {
         if (selectedYear !in years) selectedYear = years.first()
@@ -130,28 +132,12 @@ fun CollectionStatsScreen(
                     }
                 },
                 actions = {
-                    Box {
-                        IconButton(
-                            onClick = { shareMenu = true },
-                            modifier = Modifier.clearAndSetSemantics {
-                                contentDescription = "Share collection. Creates a collage image of your puzzles to share"
-                            },
-                        ) {
-                            Icon(Icons.Filled.Share, contentDescription = null)
-                        }
-                        DropdownMenu(expanded = shareMenu, onDismissRequest = { shareMenu = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Share Entire Collection (${puzzles.size})") },
-                                onClick = { shareMenu = false },
-                                enabled = puzzles.isNotEmpty(),
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Share Visible List (${puzzles.size})") },
-                                onClick = { shareMenu = false },
-                                enabled = puzzles.isNotEmpty(),
-                            )
-                        }
-                    }
+                    PuzzleShareMenu(
+                        entireCollection = puzzles,
+                        visibleList = puzzles,
+                        imageVector = Icons.Filled.Share,
+                        onShare = { selected -> viewModel.share(context, selected) },
+                    )
                 },
             )
         },
