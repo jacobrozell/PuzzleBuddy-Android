@@ -24,7 +24,7 @@ cp app/google-services.json.example app/google-services.json   # CI does this au
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-`testDebugUnitTest assembleDebug` passed on 2026-11-06 (262 tests). M2 and M3 screens were checked on the Medium Phone API 36.1 emulator. M5 checks are in `docs/implementation/1.1.0-catch-up.md`.
+`testDebugUnitTest assembleDebug` passed on 2026-11-06 (262 tests). The phone pass is in `docs/implementation/1.1.0-catch-up.md` §8. Tablet, TalkBack, camera, and a v1 upgrade were not run.
 
 ## Firebase setup
 

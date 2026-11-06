@@ -97,3 +97,4 @@ CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. iOS `1.1.
 | 2026-11-05 | M2 done: list (filters, sort, rows, empty states, delete confirm), five-photo form, detail, barcode/quick add/shopping, Settings, onboarding copy, storage banners, contrast tokens. Fixed: form text fields losing focus when the keyboard opened, stale detail after edit, spaces dropped while typing brand/store/notes. Emulator-checked on a phone in light, dark, and 150% font. 239 unit tests green. |
 | 2026-11-05 | M3 done: history, undo, timer card, pick next, stats, share collage, What's New (no iPhone Duo), Play review prompt. Phone emulator in light, and dark for stats. 253 unit tests green. |
 | 2026-11-06 | M4 done: telemetry call sites, version 1.1.0 (2), product flags, JSON backup format (no Settings UI). |
+| 2026-11-06 | M5 phone pass: history, loan, timer start, stats, settings 1.1.0. 262 unit tests. Tablet, TalkBack, camera, and a v1 upgrade not run. Not merged. |
