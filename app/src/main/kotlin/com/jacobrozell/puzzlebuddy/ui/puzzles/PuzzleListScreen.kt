@@ -191,7 +191,7 @@ fun PuzzleListScreen(
         )
     }
 
-    if (showPickNext) {
+    if (ProductSurface.isPickNextEnabled && showPickNext) {
         PickNextSheet(
             puzzles = state.allPuzzles,
             tags = state.availableTags,
@@ -251,8 +251,10 @@ fun PuzzleListScreen(
             TopAppBar(
                 title = { Text("Puzzle Buddy") },
                 actions = {
-                    IconButton(onClick = { showPickNext = true }) {
-                        Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
+                    if (ProductSurface.isPickNextEnabled) {
+                        IconButton(onClick = { showPickNext = true }) {
+                            Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
+                        }
                     }
                     if (ProductSurface.isShoppingModeEnabled) {
                         IconButton(onClick = { requestCameraAndRun { showShopping = true } }) {

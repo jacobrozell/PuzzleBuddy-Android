@@ -68,6 +68,7 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.CollectionStats
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagIndex
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
+import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
 import com.jacobrozell.puzzlebuddy.ui.picknext.PickNextSheet
 import com.jacobrozell.puzzlebuddy.ui.share.PuzzleShareMenu
 import com.jacobrozell.puzzlebuddy.ui.puzzles.LARGE_FONT_SCALE
@@ -112,7 +113,7 @@ fun CollectionStatsScreen(
     val columns = if (largeFont) 1 else 2
     val tags = remember(puzzles) { PuzzleTagIndex.counts(puzzles, limit = Int.MAX_VALUE) }
 
-    if (showPickNext) {
+    if (ProductSurface.isPickNextEnabled && showPickNext) {
         PickNextSheet(
             puzzles = puzzles,
             tags = tags,
@@ -127,8 +128,10 @@ fun CollectionStatsScreen(
             TopAppBar(
                 title = { Text("Stats") },
                 navigationIcon = {
-                    IconButton(onClick = { showPickNext = true }) {
-                        Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
+                    if (ProductSurface.isPickNextEnabled) {
+                        IconButton(onClick = { showPickNext = true }) {
+                            Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
+                        }
                     }
                 },
                 actions = {

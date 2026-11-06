@@ -1,14 +1,15 @@
 package com.jacobrozell.puzzlebuddy.domain.surface
 
 /**
- * Android release-surface gates mirroring iOS [ProductService] for 1.0.0 lean local-first ship.
+ * Android release-surface gates mirroring iOS ProductService.
  */
 object ProductSurface {
     val isLoginEnabled: Boolean = false
     val isCloudSyncEnabled: Boolean = false
     val isBarcodeScanEnabled: Boolean = true
     val isShoppingModeEnabled: Boolean = true
-    val isIPDbImportEnabled: Boolean = true
+    val isPickNextEnabled: Boolean = true
+    val isFriendsListEnabled: Boolean = false
 
     /** Off until the Play listing exists; a dead store link fails review. Gates Write a Review. */
     val isPlayListingLive: Boolean = false
