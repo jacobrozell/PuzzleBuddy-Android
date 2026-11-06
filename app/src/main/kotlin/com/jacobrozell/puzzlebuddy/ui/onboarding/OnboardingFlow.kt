@@ -19,30 +19,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.jacobrozell.puzzlebuddy.domain.onboarding.OnboardingCopy
 import com.jacobrozell.puzzlebuddy.ui.designsystem.BrandBackground
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
 import kotlinx.coroutines.launch
 
-private data class OnboardingPage(val title: String, val message: String)
-
-private val pages = listOf(
-    OnboardingPage(
-        title = "Welcome to Puzzle Buddy",
-        message = "Your personal jigsaw puzzle catalog — track every box on your shelf, offline and private.",
-    ),
-    OnboardingPage(
-        title = "Shop With Confidence",
-        message = "Scan a barcode at the thrift store to check duplicates instantly, or look up product details when online lookup is enabled.",
-    ),
-    OnboardingPage(
-        title = "Build Your Collection",
-        message = "Log brands, piece counts, progress, and ratings. Import from IPDb CSV in Settings.",
-    ),
-    OnboardingPage(
-        title = "Ready to Puzzle?",
-        message = "Everything stays on your device. Add your first puzzle to get started.",
-    ),
-)
+private val pages = OnboardingCopy.pages()
 
 @Composable
 fun OnboardingFlow(

@@ -23,6 +23,7 @@ import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import com.jacobrozell.puzzlebuddy.ui.navigation.PuzzleBuddyNavHost
 import com.jacobrozell.puzzlebuddy.ui.onboarding.OnboardingFlow
 import com.jacobrozell.puzzlebuddy.ui.splash.SplashScreen
@@ -72,7 +73,12 @@ class MainActivity : ComponentActivity() {
                 when {
                     showSplash -> SplashScreen()
                     else -> {
-                        Surface(modifier = Modifier.fillMaxSize()) {
+                        // Hide the shell from TalkBack while onboarding covers it.
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(if (showOnboarding) Modifier.clearAndSetSemantics {} else Modifier),
+                        ) {
                             PuzzleBuddyNavHost(
                                 onReplayOnboarding = { showOnboarding = true },
                             )
