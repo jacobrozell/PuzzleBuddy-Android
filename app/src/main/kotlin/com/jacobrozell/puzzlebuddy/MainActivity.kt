@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,10 +20,14 @@ import androidx.lifecycle.lifecycleScope
 import com.jacobrozell.puzzlebuddy.bootstrap.AppBootstrapper
 import com.jacobrozell.puzzlebuddy.data.prefs.AppPreferencesStore
 import com.jacobrozell.puzzlebuddy.data.prefs.OnboardingStore
+import com.jacobrozell.puzzlebuddy.domain.surface.WhatsNewPrompt
+import com.jacobrozell.puzzlebuddy.support.TelemetryRuntime
+import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsKeyValueStore
 import com.jacobrozell.puzzlebuddy.support.logging.AnalyticsUserContext
 import com.jacobrozell.puzzlebuddy.support.logging.AppLogger
 import com.jacobrozell.puzzlebuddy.support.logging.LogCategory
 import com.jacobrozell.puzzlebuddy.support.logging.info
+import com.jacobrozell.puzzlebuddy.ui.whatsnew.WhatsNewSheet
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import com.jacobrozell.puzzlebuddy.ui.navigation.PuzzleBuddyNavHost
 import com.jacobrozell.puzzlebuddy.ui.onboarding.OnboardingFlow
@@ -40,6 +45,7 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var appBootstrapper: AppBootstrapper
     @Inject lateinit var logger: AppLogger
     @Inject lateinit var userContext: AnalyticsUserContext
+    @Inject lateinit var analyticsStore: AnalyticsKeyValueStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             var showOnboarding by remember { mutableStateOf(onboardingStore.shouldPresentOnLaunch) }
+            var showWhatsNew by remember { mutableStateOf(false) }
             val appearanceMode by appPreferencesStore.appearanceMode.collectAsStateWithLifecycle(initialValue = "system")
             val darkTheme = when (appearanceMode) {
                 "light" -> false
@@ -64,9 +71,39 @@ class MainActivity : ComponentActivity() {
                 onDispose { onboardingStore.removeReplayListener(listener) }
             }
 
-            androidx.compose.runtime.LaunchedEffect(Unit) {
+            LaunchedEffect(Unit) {
                 delay(900)
                 showSplash = false
+            }
+            LaunchedEffect(showSplash, showOnboarding) {
+                if (showSplash || showOnboarding) return@LaunchedEffect
+                showWhatsNew = WhatsNewPrompt.shouldPresent(
+                    onboardingComplete = true,
+                    seenVersion = analyticsStore.getStringOrNull(WhatsNewPrompt.STORAGE_KEY),
+                    isUnderTest = TelemetryRuntime.isRunningUnderInstrumentedTest(),
+                )
+            }
+            LaunchedEffect(showWhatsNew) {
+                if (!showWhatsNew) return@LaunchedEffect
+                logger.info(
+                    LogCategory.UI,
+                    eventName = "whats_new_shown",
+                    message = "Showed 1.1 What's New notes.",
+                )
+            }
+            val dismissWhatsNew = {
+                if (showWhatsNew) {
+                    showWhatsNew = false
+                    analyticsStore.putString(WhatsNewPrompt.STORAGE_KEY, WhatsNewPrompt.NOTES_VERSION)
+                    logger.info(
+                        LogCategory.UI,
+                        eventName = "whats_new_dismissed",
+                        message = "Dismissed 1.1 What's New notes.",
+                    )
+                }
+            }
+            val markWhatsNewSeen = {
+                analyticsStore.putString(WhatsNewPrompt.STORAGE_KEY, WhatsNewPrompt.NOTES_VERSION)
             }
 
             PuzzleBuddyTheme(darkTheme = darkTheme) {
@@ -83,6 +120,9 @@ class MainActivity : ComponentActivity() {
                                 onReplayOnboarding = { showOnboarding = true },
                             )
                         }
+                        if (showWhatsNew && !showOnboarding) {
+                            WhatsNewSheet(onDismiss = dismissWhatsNew)
+                        }
                         if (showOnboarding) {
                             OnboardingFlow(
                                 onSkipped = {
@@ -94,6 +134,7 @@ class MainActivity : ComponentActivity() {
                                             metadata = mapOf("page_index" to "0"),
                                         )
                                         onboardingStore.markComplete()
+                                        markWhatsNewSeen()
                                         userContext.syncOnboardingComplete(true)
                                         showOnboarding = false
                                     }
@@ -101,6 +142,7 @@ class MainActivity : ComponentActivity() {
                                 onFinished = {
                                     lifecycleScope.launch {
                                         onboardingStore.markComplete()
+                                        markWhatsNewSeen()
                                         userContext.syncOnboardingComplete(true)
                                         showOnboarding = false
                                         logger.info(

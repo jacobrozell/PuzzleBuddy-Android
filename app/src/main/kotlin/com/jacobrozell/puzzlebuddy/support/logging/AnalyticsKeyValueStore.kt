@@ -7,12 +7,15 @@ interface AnalyticsKeyValueStore {
     fun putStringSet(key: String, values: Set<String>)
     fun getBoolean(key: String): Boolean
     fun putBoolean(key: String, value: Boolean)
+    fun getStringOrNull(key: String): String?
+    fun putString(key: String, value: String)
 }
 
 class InMemoryAnalyticsKeyValueStore : AnalyticsKeyValueStore {
     private val longs = mutableMapOf<String, Long>()
     private val stringSets = mutableMapOf<String, Set<String>>()
     private val booleans = mutableMapOf<String, Boolean>()
+    private val strings = mutableMapOf<String, String>()
 
     override fun getLongOrNull(key: String): Long? = longs[key]
 
@@ -30,6 +33,12 @@ class InMemoryAnalyticsKeyValueStore : AnalyticsKeyValueStore {
 
     override fun putBoolean(key: String, value: Boolean) {
         booleans[key] = value
+    }
+
+    override fun getStringOrNull(key: String): String? = strings[key]
+
+    override fun putString(key: String, value: String) {
+        strings[key] = value
     }
 }
 
