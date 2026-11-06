@@ -238,6 +238,19 @@ class PuzzleRepositoryTest {
     }
 
     @Test
+    fun finishingOnePuzzleFiveTimesDoesNotLogFiveCompletions() = runTest {
+        val id = add(fixture("Repeat", PuzzleStatus.COMPLETED))
+        repeat(4) {
+            repo.startRedo(id)
+            repo.update(load(id).copy(status = PuzzleStatus.COMPLETED, completionDate = clock.now))
+        }
+
+        val milestones = events("milestone_reached").map { it.metadata["milestone_id"] }
+        assertTrue(milestones.contains("first_completion"))
+        assertFalse(milestones.contains("five_completions"))
+    }
+
+    @Test
     fun startRedoPreservesLastCompletionDate() = runTest {
         val finishedAt = epoch(1_700_000_000)
         val id = add(fixture("KeepDate", PuzzleStatus.COMPLETED).copy(completionDate = finishedAt))
@@ -585,6 +598,10 @@ class PuzzleRepositoryTest {
         val floral = puzzles.first { it.name == "Floral Arch" }
         assertEquals(2, floral.completions.size)
         assertEquals("13", events("demo_data_loaded").single().metadata["puzzle_count"])
+        assertEquals(13, events("puzzle_added").size)
+        assertTrue(events("puzzle_added").all { it.metadata["add_source"] == "demo" })
+        val milestones = events("milestone_reached").map { it.metadata["milestone_id"] }
+        assertEquals(listOf("first_puzzle", "ten_puzzles", "first_completion", "five_completions"), milestones)
     }
 
     @Test

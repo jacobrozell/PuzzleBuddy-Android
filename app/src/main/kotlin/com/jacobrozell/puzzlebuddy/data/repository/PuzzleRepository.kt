@@ -438,7 +438,14 @@ class PuzzleRepository @Inject constructor(
                     pending[photo.id] = bytes
                     photo.copy(fileName = null)
                 }
-                addFromSeed(puzzle.copy(photos = photos), pending, puzzle.completions)
+                val seeded = puzzle.copy(photos = photos)
+                addFromSeed(seeded, pending, puzzle.completions)
+                logger.info(
+                    LogCategory.PUZZLES,
+                    eventName = "puzzle_added",
+                    message = "Puzzle added.",
+                    metadata = PuzzleAnalyticsMetadata.metadata(seeded, PuzzleAddSource.DEMO),
+                )
             }
             logger.info(
                 LogCategory.PUZZLES,
@@ -446,6 +453,7 @@ class PuzzleRepository @Inject constructor(
                 message = "Demo puzzles loaded.",
                 metadata = mapOf("puzzle_count" to demoCount().toString()),
             )
+            syncCollectionAnalytics()
         } catch (error: Exception) {
             logger.warning(
                 LogCategory.PUZZLES,
@@ -655,7 +663,6 @@ class PuzzleRepository @Inject constructor(
                 message = "Recorded puzzle completion.",
                 metadata = PuzzleAnalyticsMetadata.completionMetadata(puzzle, completionNumber),
             )
-            analyticsMilestones.logCompletionMilestones(completionNumber)
         }
         syncCollectionAnalytics()
     }
