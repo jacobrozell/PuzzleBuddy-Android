@@ -220,6 +220,12 @@ fun PuzzleDetailScreen(
                                         onSave = viewModel::saveCompletion,
                                         onDelete = viewModel::removeCompletion,
                                     )
+                                    PuzzleTimerCard(
+                                        puzzle = content.puzzle,
+                                        onStart = viewModel::startTimer,
+                                        onPause = viewModel::pauseTimer,
+                                        onReset = viewModel::resetTimer,
+                                    )
                                 }
                             },
                             secondPane = { DetailsPanel(content.puzzle) },

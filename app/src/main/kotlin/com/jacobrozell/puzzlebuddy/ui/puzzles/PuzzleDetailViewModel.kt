@@ -111,6 +111,12 @@ class PuzzleDetailViewModel @Inject constructor(
         repository.expireCompletionUndoIfNeeded(puzzleId, Instant.now(clock))
     }
 
+    fun startTimer() = perform("Could not start timer") { repository.startTimer(puzzleId) }
+
+    fun pauseTimer() = perform("Could not pause timer") { repository.pauseTimer(puzzleId) }
+
+    fun resetTimer() = perform("Could not reset timer") { repository.resetTimer(puzzleId) }
+
     private fun perform(title: String, block: suspend () -> Unit) {
         viewModelScope.launch {
             try {
