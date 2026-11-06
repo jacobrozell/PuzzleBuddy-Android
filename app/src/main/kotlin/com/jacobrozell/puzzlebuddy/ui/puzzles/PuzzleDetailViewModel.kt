@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleProgressSemantics
+import com.jacobrozell.puzzlebuddy.domain.completion.PuzzleCompletion
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +71,22 @@ class PuzzleDetailViewModel @Inject constructor(
         repository.delete(puzzleId)
         onDeleted()
     }
+
+    fun saveCompletion(completion: PuzzleCompletion, onSaved: () -> Unit, onFailed: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.updateCompletion(puzzleId, completion)
+                onSaved()
+            } catch (failure: Exception) {
+                onFailed(failure.message ?: "Try again.")
+            }
+        }
+    }
+
+    fun removeCompletion(completionId: String, statusIfRemovingLast: PuzzleStatus?) =
+        perform("Could not remove completion") {
+            repository.deleteCompletion(puzzleId, completionId, statusIfRemovingLast)
+        }
 
     private fun perform(title: String, block: suspend () -> Unit) {
         viewModelScope.launch {

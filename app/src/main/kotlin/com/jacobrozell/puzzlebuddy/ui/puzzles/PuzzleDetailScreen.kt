@@ -192,6 +192,11 @@ fun PuzzleDetailScreen(
                                     onPuzzleAgain = { confirm = PendingConfirm.PUZZLE_AGAIN },
                                     onMarkReturned = { confirm = PendingConfirm.MARK_RETURNED },
                                 )
+                                CompletionHistorySection(
+                                    puzzle = content.puzzle,
+                                    onSave = viewModel::saveCompletion,
+                                    onDelete = viewModel::removeCompletion,
+                                )
                             }
                         },
                         secondPane = { DetailsPanel(content.puzzle) },
