@@ -72,7 +72,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -86,6 +89,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jacobrozell.puzzlebuddy.data.local.StoreNotice
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListFilters
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListEmptyState
@@ -118,6 +122,7 @@ fun PuzzleListScreen(
     viewModel: PuzzleListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val storeNotice by viewModel.storeNotice.collectAsStateWithLifecycle()
     var showScanner by remember { mutableStateOf(false) }
     var showShopping by remember { mutableStateOf(false) }
     var showTagSheet by remember { mutableStateOf(false) }
@@ -277,6 +282,7 @@ fun PuzzleListScreen(
     ) { padding ->
         ReadableContentWidth(modifier = Modifier.padding(padding)) {
             Column(modifier = Modifier.fillMaxSize()) {
+                storeNotice?.let { notice -> StoreNoticeBanner(notice) { viewModel.dismissStoreNotice(notice) } }
                 FilterHeader(
                     state = state,
                     viewModel = viewModel,
@@ -290,6 +296,35 @@ fun PuzzleListScreen(
                     onAddPuzzle = { onAddPuzzle(null) },
                 )
             }
+        }
+    }
+}
+
+/** Storage warning from iOS `PuzzleView.noticeBanner`. */
+@Composable
+private fun StoreNoticeBanner(notice: StoreNotice, onDismiss: () -> Unit) {
+    val brand = BrandTokens.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BrandTokens.accentWarm.copy(alpha = 0.12f))
+            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(Icons.Filled.Warning, contentDescription = null, tint = brand.accentWarmText)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clearAndSetSemantics { contentDescription = notice.accessibilityLabel },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(notice.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = brand.textPrimary)
+            Text(notice.message, style = MaterialTheme.typography.bodySmall, color = brand.textSecondary)
+        }
+        IconButton(onClick = onDismiss) {
+            Icon(Icons.Filled.Clear, contentDescription = notice.dismissLabel, tint = brand.textSecondary)
         }
     }
 }

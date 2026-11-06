@@ -3,6 +3,8 @@ package com.jacobrozell.puzzlebuddy.ui.puzzles
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.barcode.BarcodeMetadataCache
+import com.jacobrozell.puzzlebuddy.data.local.StoreNotice
+import com.jacobrozell.puzzlebuddy.data.local.StoreNotices
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListEmptyState
@@ -51,7 +53,12 @@ class PuzzleListViewModel @Inject constructor(
     private val logger: AppLogger,
     private val barcodeMetadataCache: BarcodeMetadataCache,
     private val sessionContext: AnalyticsSessionContext,
+    private val storeNotices: StoreNotices,
 ) : ViewModel() {
+    val storeNotice: StateFlow<StoreNotice?> = storeNotices.notice
+
+    fun dismissStoreNotice(notice: StoreNotice) = storeNotices.dismiss(notice)
+
     private var didLogListRefresh = false
     private val filters = MutableStateFlow(PuzzleListFilters())
     private val sortOption = MutableStateFlow(PuzzleListSortOption.COMPLETION_DATE)
