@@ -2,7 +2,6 @@ package com.jacobrozell.puzzlebuddy.domain.export
 
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleRating
-import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -56,11 +55,11 @@ object PuzzleCollectionExporter {
     fun exportRecords(puzzles: List<Puzzle>): List<PuzzleExportRecord> =
         puzzles.map(::exportRecord)
 
-    fun jsonData(puzzles: List<Puzzle>): ByteArray {
+    fun jsonData(puzzles: List<Puzzle>, appVersion: String): ByteArray {
         if (puzzles.isEmpty()) throw PuzzleCollectionExportError("Add at least one puzzle before exporting.")
         val payload = ExportPayload(
             exportedAt = isoFormatter.format(Instant.now().atZone(ZoneId.systemDefault())),
-            appVersion = ProductSurface.LEAN_VERSION,
+            appVersion = appVersion,
             puzzleCount = puzzles.size,
             puzzles = exportRecords(puzzles),
         )

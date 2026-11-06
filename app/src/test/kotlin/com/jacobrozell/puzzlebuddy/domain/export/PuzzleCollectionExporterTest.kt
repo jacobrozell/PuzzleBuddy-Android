@@ -24,7 +24,7 @@ class PuzzleCollectionExporterTest {
 
     @Test
     fun jsonExportIncludesPuzzleName() {
-        val json = PuzzleCollectionExporter.jsonData(listOf(sample)).decodeToString()
+        val json = PuzzleCollectionExporter.jsonData(listOf(sample), appVersion = "1.1.0").decodeToString()
         assertTrue(json.contains("Winter Lights"))
         assertTrue(json.contains("012345678905"))
     }
@@ -40,7 +40,7 @@ class PuzzleCollectionExporterTest {
     @Test
     fun emptyCollectionThrows() {
         try {
-            PuzzleCollectionExporter.jsonData(emptyList())
+            PuzzleCollectionExporter.jsonData(emptyList(), appVersion = "1.1.0")
             error("Expected export error")
         } catch (error: PuzzleCollectionExportError) {
             assertEquals("Add at least one puzzle before exporting.", error.message)
