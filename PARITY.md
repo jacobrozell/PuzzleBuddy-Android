@@ -25,17 +25,17 @@
 | Five statuses (Wishlist, To-Do, In-Progress, Completed, Abandoned) | ✅ list tabs (menu at large font), form, detail |
 | Metadata (dates, price, type, material, shape, cut, disposition) | ✅ form sections and detail rows in iOS order |
 | Photos, up to 5, files on disk | ✅ gallery editor and detail pager; picking not emulator-checked |
-| Completion history, redo, undo | 🟡 repository, covered by ported iOS store tests; no UI |
+| Completion history, redo, undo | ✅ history editor, undo banner, Puzzle again |
 | On loan + friends | ✅ form (name, due back), list badge and filters, detail rows, Mark returned; no People list (same as iOS) |
-| In-app timer | 🟡 repository commands; list badge only |
-| Pick next | ⬜ |
-| Stats (finishes, year picker, charts, milestones) | 🟡 domain math; screen is still the old ~14 metrics |
-| Share collage | ⬜ |
+| In-app timer | ✅ detail card, list badge, one running timer |
+| Pick next | ✅ list and Stats |
+| Stats (finishes, year picker, charts, milestones) | ✅ |
+| Share collage | ✅ list overflow and Stats |
 | Demo catalog (13 puzzles, covers, Paris on loan, Floral Arch ×2) | ✅ emulator-checked 2026-11-05 |
 | Online barcode lookup (UPCitemdb) | ✅ removed, as on iOS. Quick add prefills from saved puzzles only. |
 | Settings import / export | ✅ UI removed, as on iOS; helpers still build |
-| Write a Review + in-app review prompt | 🟡 Settings row behind `isPlayListingLive` (off); prompt is M3 |
-| What's New | ⬜ |
+| Write a Review + in-app review prompt | 🟡 prompt wired after a scan or a non-demo edit; Settings row still behind `isPlayListingLive` (off) |
+| What's New | ✅ 1.1 notes, without the iPhone Duo item |
 | Store-reset and ephemeral banners | ✅ |
 | Delete all data, including borrower names | ✅ |
 | Analytics allowlist | ✅ matches tag `1.1.0` |
@@ -50,17 +50,17 @@
 | Start date and date labels | ✅ | ✅ |
 | Purchase location, price, year, type, material, shape, cut, dimensions, disposition | ✅ | ✅ |
 | Multi-photo gallery (cover = first, arrow reorder) | ✅ | ✅ |
-| Completion history edit / delete | ✅ | 🟡 repository |
-| Undo completion banner | ✅ | 🟡 repository, 5-minute window |
+| Completion history edit / delete | ✅ | ✅ |
+| Undo completion banner | ✅ | ✅ |
 | Puzzle again (redo) | ✅ | ✅ |
 | On loan, overdue, Mark returned | ✅ | ✅ |
 | Friends table | ✅ model only | 🟡 model + Room; list UI stays off |
-| In-app stopwatch | ✅ | 🟡 store; no timer card |
-| Pick next puzzle | ✅ | ⬜ |
-| Stats year picker, monthly chart, on-loan card, milestone banner | ✅ | 🟡 `CollectionStats` math only |
-| Share collage | ✅ | ⬜ |
-| What's New 1.1 | ✅ | ⬜ |
-| Play / App Store review prompt | ✅ | ⬜ |
+| In-app stopwatch | ✅ | ✅ |
+| Pick next puzzle | ✅ | ✅ |
+| Stats year picker, monthly chart, on-loan card, milestone banner | ✅ | ✅ |
+| Share collage | ✅ | ✅ |
+| What's New 1.1 | ✅ | ✅ without the iPhone Duo item |
+| Play / App Store review prompt | ✅ | 🟡 once after a scan or non-demo edit; Settings row hidden |
 | Demo data, 13 puzzles | ✅ | ✅ |
 
 ## Still the 1.0 shell
@@ -94,3 +94,4 @@ CI pins the iOS checkout to tag `1.1.0` in `.github/workflows/ci.yml`. Bump it w
 | 2026-11-05 | Rebaselined on iOS tag `1.1.0`. CI repinned; parity script passes against the tag. 65 unit tests green. Plan: [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md). |
 | 2026-11-05 | M1 done: stats count finish logs after Puzzle again (iOS #44), `PuzzleCompletion.ratingLabel`, 48 ported store tests on in-memory DAOs with rollback, ported iOS domain tests (stats, list filters, timer, photos, history, undo, metrics, milestones, picker, share, loans, demo, enums), and UPCitemdb removed. 224 unit tests green. |
 | 2026-11-05 | M2 done: list (filters, sort, rows, empty states, delete confirm), five-photo form, detail, barcode/quick add/shopping, Settings, onboarding copy, storage banners, contrast tokens. Fixed: form text fields losing focus when the keyboard opened, stale detail after edit, spaces dropped while typing brand/store/notes. Emulator-checked on a phone in light, dark, and 150% font. 239 unit tests green. |
+| 2026-11-05 | M3 done: history, undo, timer card, pick next, stats, share collage, What's New (no iPhone Duo), Play review prompt. Phone emulator in light, and dark for stats. 253 unit tests green. |
