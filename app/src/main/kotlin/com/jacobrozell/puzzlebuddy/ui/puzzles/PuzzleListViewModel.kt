@@ -9,6 +9,7 @@ import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListEmptyState
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListFilters
+import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListPieceCountFilter
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListQuery
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListSortOption
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListStatusFilter
@@ -198,5 +199,17 @@ class PuzzleListViewModel @Inject constructor(
                 ),
             )
         }
+    }
+
+    fun logPickNextSelected(entryPoint: String, pieceCount: PuzzleListPieceCountFilter) {
+        logger.info(
+            LogCategory.UI,
+            eventName = "pick_next_puzzle_selected",
+            message = "Pick next puzzle selected.",
+            metadata = mapOf(
+                "entry_point" to entryPoint,
+                "piece_count_bucket" to PuzzleAnalyticsMetadata.pieceCountBucket(pieceCount),
+            ),
+        )
     }
 }

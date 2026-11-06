@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -112,6 +113,7 @@ import com.jacobrozell.puzzlebuddy.ui.components.PickerField
 import androidx.compose.ui.platform.LocalDensity
 import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveLayout
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
+import com.jacobrozell.puzzlebuddy.ui.picknext.PickNextSheet
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 import java.time.Instant
 
@@ -126,6 +128,7 @@ fun PuzzleListScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val storeNotice by viewModel.storeNotice.collectAsStateWithLifecycle()
     var showScanner by remember { mutableStateOf(false) }
+    var showPickNext by remember { mutableStateOf(false) }
     var showShopping by remember { mutableStateOf(false) }
     var showTagSheet by remember { mutableStateOf(false) }
     var addMenuExpanded by remember { mutableStateOf(false) }
@@ -183,6 +186,16 @@ fun PuzzleListScreen(
         )
     }
 
+    if (showPickNext) {
+        PickNextSheet(
+            puzzles = state.allPuzzles,
+            tags = state.availableTags,
+            onOpen = onOpenPuzzle,
+            onPicked = { filter -> viewModel.logPickNextSelected("list", filter) },
+            onDismiss = { showPickNext = false },
+        )
+    }
+
     if (showTagSheet) {
         TagFilterSheet(
             tags = state.availableTags,
@@ -233,6 +246,9 @@ fun PuzzleListScreen(
             TopAppBar(
                 title = { Text("Puzzle Buddy") },
                 actions = {
+                    IconButton(onClick = { showPickNext = true }) {
+                        Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
+                    }
                     if (ProductSurface.isShoppingModeEnabled) {
                         IconButton(onClick = { requestCameraAndRun { showShopping = true } }) {
                             Icon(Icons.Filled.QrCodeScanner, contentDescription = "Check duplicate")
