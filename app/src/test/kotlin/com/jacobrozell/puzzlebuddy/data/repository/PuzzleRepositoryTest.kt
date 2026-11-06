@@ -588,6 +588,18 @@ class PuzzleRepositoryTest {
     }
 
     @Test
+    fun loadDemoPuzzlesRejectsASecondShelfWithTheSameBarcodes() = runTest {
+        repo.loadDemoPuzzles()
+
+        val error = assertThrows<PuzzleStoreException.DuplicateBarcode> { repo.loadDemoPuzzles() }
+
+        assertEquals("The Bizarre Bookshop", error.existingPuzzleName)
+        assertEquals(13, repo.allPuzzles().size)
+        assertEquals(1, events("demo_data_loaded").size)
+        assertEquals(1, events("demo_data_seed_failed").size)
+    }
+
+    @Test
     fun removeDemoPuzzlesKeepsUserPuzzlesAndTheirLoanFriend() = runTest {
         repo.loadDemoPuzzles()
         val mine = add(fixture("Mine").copy(isOnLoan = true, loanedToDisplayName = "Mom"))

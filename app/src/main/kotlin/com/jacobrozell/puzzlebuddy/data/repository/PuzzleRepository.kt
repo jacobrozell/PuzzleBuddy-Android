@@ -452,6 +452,7 @@ class PuzzleRepository @Inject constructor(
                 eventName = "demo_data_seed_failed",
                 message = error.message ?: "Demo data seed failed.",
             )
+            throw error
         }
     }
 
@@ -517,6 +518,7 @@ class PuzzleRepository @Inject constructor(
         pending: Map<String, ByteArray>,
         completions: List<PuzzleCompletion>,
     ) {
+        requireUniqueBarcode(puzzle, excludingId = null)
         val (withFiles, written) = materializePhotos(puzzle, pending)
         try {
             transactions.run {
