@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jacobrozell.puzzlebuddy.data.repository.PuzzleRepository
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleProgressSemantics
+import com.jacobrozell.puzzlebuddy.domain.completion.CompletionUndoSemantics
+import com.jacobrozell.puzzlebuddy.domain.completion.CompletionUndoSnapshot
 import com.jacobrozell.puzzlebuddy.domain.completion.PuzzleCompletion
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
@@ -31,6 +33,7 @@ data class DetailError(val title: String, val message: String)
 data class PuzzleDetailUiState(
     val content: PuzzleDetailContent = PuzzleDetailContent.Loading,
     val error: DetailError? = null,
+    val undo: CompletionUndoSnapshot? = null,
 )
 
 /** Follows the stored puzzle, so edits saved elsewhere show up here without a reload. */
@@ -43,10 +46,18 @@ class PuzzleDetailViewModel @Inject constructor(
     private val puzzleId: String = savedStateHandle.get<String>("id").orEmpty()
     private val error = MutableStateFlow<DetailError?>(null)
 
-    val uiState: StateFlow<PuzzleDetailUiState> = combine(repository.observePuzzles(), error) { puzzles, error ->
+    val uiState: StateFlow<PuzzleDetailUiState> = combine(
+        repository.observePuzzles(),
+        repository.pendingCompletionUndo,
+        error,
+    ) { puzzles, pendingUndo, detailError ->
         val puzzle = puzzles.firstOrNull { it.id == puzzleId }
         val content = if (puzzle != null) PuzzleDetailContent.Loaded(puzzle) else PuzzleDetailContent.Missing
-        PuzzleDetailUiState(content = content, error = error)
+        PuzzleDetailUiState(
+            content = content,
+            error = detailError,
+            undo = CompletionUndoSemantics.activeSnapshot(pendingUndo, puzzleId, Instant.now(clock)),
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PuzzleDetailUiState())
 
     suspend fun photoBytes(photo: PuzzlePhoto): ByteArray? = repository.photoData(photo)
@@ -87,6 +98,18 @@ class PuzzleDetailViewModel @Inject constructor(
         perform("Could not remove completion") {
             repository.deleteCompletion(puzzleId, completionId, statusIfRemovingLast)
         }
+
+    fun undoCompletion() = perform("Could not undo completion") {
+        repository.undoLastCompletion(puzzleId, Instant.now(clock))
+    }
+
+    fun dismissUndo() {
+        repository.dismissCompletionUndo(puzzleId)
+    }
+
+    fun expireUndo() {
+        repository.expireCompletionUndoIfNeeded(puzzleId, Instant.now(clock))
+    }
 
     private fun perform(title: String, block: suspend () -> Unit) {
         viewModelScope.launch {

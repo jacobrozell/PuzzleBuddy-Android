@@ -24,6 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
@@ -57,8 +59,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -69,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacobrozell.puzzlebuddy.domain.catalog.MediumDateLabel
+import com.jacobrozell.puzzlebuddy.domain.completion.CompletionUndoSemantics
 import com.jacobrozell.puzzlebuddy.domain.catalog.PurchasePriceFormatting
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleDateSemantics
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleDetailMetrics
@@ -89,6 +94,8 @@ import com.jacobrozell.puzzlebuddy.ui.components.StarRatingSummary
 import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveTwoPane
 import com.jacobrozell.puzzlebuddy.ui.designsystem.ReadableContentWidth
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
+import kotlinx.coroutines.delay
+import java.time.Duration
 import java.time.Instant
 
 private enum class PendingConfirm { PUZZLE_AGAIN, MARK_RETURNED, DELETE }
@@ -176,33 +183,107 @@ fun PuzzleDetailScreen(
                     .fillMaxSize()
                     .padding(padding),
             ) {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
-                ) {
-                    AdaptiveTwoPane(
-                        modifier = Modifier.fillMaxWidth(),
-                        firstPane = {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                SummaryPanel(content.puzzle, viewModel::photoBytes)
-                                ProgressPanel(
-                                    puzzle = content.puzzle,
-                                    onCommit = { percent -> viewModel.commitProgress(content.puzzle, percent) },
-                                    onPuzzleAgain = { confirm = PendingConfirm.PUZZLE_AGAIN },
-                                    onMarkReturned = { confirm = PendingConfirm.MARK_RETURNED },
-                                )
-                                CompletionHistorySection(
-                                    puzzle = content.puzzle,
-                                    onSave = viewModel::saveCompletion,
-                                    onDelete = viewModel::removeCompletion,
-                                )
-                            }
-                        },
-                        secondPane = { DetailsPanel(content.puzzle) },
-                    )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    state.undo?.let { snapshot ->
+                        LaunchedEffect(snapshot.recordedAt) {
+                            val remaining = Duration.between(
+                                Instant.now(),
+                                snapshot.recordedAt.plus(CompletionUndoSemantics.WINDOW),
+                            )
+                            if (!remaining.isNegative && !remaining.isZero) delay(remaining.toMillis())
+                            viewModel.expireUndo()
+                        }
+                        UndoCompletionBanner(
+                            onUndo = viewModel::undoCompletion,
+                            onDismiss = viewModel::dismissUndo,
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                    ) {
+                        AdaptiveTwoPane(
+                            modifier = Modifier.fillMaxWidth(),
+                            firstPane = {
+                                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    SummaryPanel(content.puzzle, viewModel::photoBytes)
+                                    ProgressPanel(
+                                        puzzle = content.puzzle,
+                                        onCommit = { percent -> viewModel.commitProgress(content.puzzle, percent) },
+                                        onPuzzleAgain = { confirm = PendingConfirm.PUZZLE_AGAIN },
+                                        onMarkReturned = { confirm = PendingConfirm.MARK_RETURNED },
+                                    )
+                                    CompletionHistorySection(
+                                        puzzle = content.puzzle,
+                                        onSave = viewModel::saveCompletion,
+                                        onDelete = viewModel::removeCompletion,
+                                    )
+                                }
+                            },
+                            secondPane = { DetailsPanel(content.puzzle) },
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun UndoCompletionBanner(onUndo: () -> Unit, onDismiss: () -> Unit) {
+    val brand = BrandTokens.colors
+    val largeFont = LocalDensity.current.fontScale >= LARGE_FONT_SCALE
+    val message = @Composable {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, tint = brand.accentText)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.weight(1f)) {
+                Text(
+                    "Marked complete",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = brand.textPrimary,
+                )
+                Text(
+                    "Undo if that was an accident. Your previous status comes back.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = brand.textSecondary,
+                )
+            }
+        }
+    }
+    val actions = @Composable {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onUndo, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text("Undo", color = brand.accentText, maxLines = 1, softWrap = false)
+            }
+            IconButton(onClick = onDismiss, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.Filled.Close, contentDescription = "Dismiss undo completion", tint = brand.textSecondary)
+            }
+        }
+    }
+    val banner = Modifier
+        .fillMaxWidth()
+        .background(BrandTokens.accent.copy(alpha = 0.12f))
+        .semantics {
+            liveRegion = LiveRegionMode.Polite
+            contentDescription = "Marked complete. Undo if that was an accident."
+        }
+        .padding(12.dp)
+    if (largeFont) {
+        Column(modifier = banner, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            message()
+            actions()
+        }
+    } else {
+        Row(modifier = banner, verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(modifier = Modifier.weight(1f)) { message() }
+            actions()
         }
     }
 }
