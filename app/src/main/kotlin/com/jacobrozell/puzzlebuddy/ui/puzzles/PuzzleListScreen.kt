@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -13,17 +14,24 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Casino
@@ -74,6 +82,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -311,7 +322,7 @@ fun PuzzleListScreen(
             }
         },
     ) { padding ->
-        ReadableContentWidth(modifier = Modifier.padding(padding)) {
+        ReadableContentWidth(modifier = Modifier.padding(padding).fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 storeNotice?.let { notice -> StoreNoticeBanner(notice) { viewModel.dismissStoreNotice(notice) } }
                 FilterHeader(
@@ -319,13 +330,17 @@ fun PuzzleListScreen(
                     viewModel = viewModel,
                     onOpenTags = { showTagSheet = true },
                 )
-                PuzzleCollection(
-                    state = state,
-                    repository = viewModel.repository,
-                    onOpenPuzzle = onOpenPuzzle,
-                    onRequestDelete = viewModel::requestDelete,
-                    onAddPuzzle = { onAddPuzzle(null) },
-                )
+                // Remaining height only. fillMaxSize here starts below the header and runs
+                // off the bottom, which hides the Add puzzle button in landscape.
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    PuzzleCollection(
+                        state = state,
+                        repository = viewModel.repository,
+                        onOpenPuzzle = onOpenPuzzle,
+                        onRequestDelete = viewModel::requestDelete,
+                        onAddPuzzle = { onAddPuzzle(null) },
+                    )
+                }
             }
         }
     }
@@ -618,8 +633,11 @@ private fun PuzzleCollection(
     val now = Instant.now()
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         if (maxWidth >= AdaptiveLayout.expandedWidthBreakpoint) {
+            val gridState = rememberLazyGridState()
             LazyVerticalGrid(
+                state = gridState,
                 columns = GridCells.Adaptive(AdaptiveLayout.listGridMinCellWidth),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -634,8 +652,15 @@ private fun PuzzleCollection(
                     )
                 }
             }
+            LazyGridScrollBar(
+                state = gridState,
+                modifier = Modifier.align(Alignment.CenterEnd).collectionScrollBarPadding(),
+            )
         } else {
+            val listState = rememberLazyListState()
             LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -673,6 +698,10 @@ private fun PuzzleCollection(
                     }
                 }
             }
+            LazyListScrollBar(
+                state = listState,
+                modifier = Modifier.align(Alignment.CenterEnd).collectionScrollBarPadding(),
+            )
         }
     }
 }
@@ -680,34 +709,105 @@ private fun PuzzleCollection(
 @Composable
 private fun EmptyState(state: PuzzleListUiState, onAddPuzzle: () -> Unit) {
     val brand = BrandTokens.colors
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .then(if (state.showsAddPuzzleAction) Modifier else Modifier.semantics(mergeDescendants = true) {}),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-    ) {
-        Icon(Icons.Filled.Extension, contentDescription = null, tint = BrandTokens.accent, modifier = Modifier.size(48.dp))
-        if (state.showsAddPuzzleAction) {
+    val scroll = rememberScrollState()
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scroll)
+                .heightIn(min = maxHeight)
+                .padding(24.dp)
+                .then(if (state.showsAddPuzzleAction) Modifier else Modifier.semantics(mergeDescendants = true) {}),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        ) {
+            Icon(Icons.Filled.Extension, contentDescription = null, tint = BrandTokens.accent, modifier = Modifier.size(48.dp))
+            if (state.showsAddPuzzleAction) {
+                Text(
+                    PuzzleListEmptyState.NEW_COLLECTION_TITLE,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = brand.textPrimary,
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
             Text(
-                PuzzleListEmptyState.NEW_COLLECTION_TITLE,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = brand.textPrimary,
-                modifier = Modifier.semantics { heading() },
+                state.emptyMessage,
+                style = MaterialTheme.typography.bodyLarge,
+                color = brand.textSecondary,
+                textAlign = TextAlign.Center,
             )
+            if (state.showsAddPuzzleAction) {
+                Button(onClick = onAddPuzzle, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add puzzle") }
+            }
         }
-        Text(
-            state.emptyMessage,
-            style = MaterialTheme.typography.bodyLarge,
-            color = brand.textSecondary,
-            textAlign = TextAlign.Center,
+        ScrollIndicator(
+            scrolledPx = scroll.value.toFloat(),
+            viewportPx = scroll.viewportSize.toFloat(),
+            contentPx = (scroll.viewportSize + scroll.maxValue).toFloat(),
+            modifier = Modifier.align(Alignment.CenterEnd).collectionScrollBarPadding(),
         )
-        if (state.showsAddPuzzleAction) {
-            Button(onClick = onAddPuzzle, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add puzzle") }
-        }
     }
+}
+
+private fun Modifier.collectionScrollBarPadding(): Modifier =
+    fillMaxHeight().padding(top = 4.dp, end = 4.dp, bottom = 72.dp).width(6.dp)
+
+/** Drawn whenever the content is taller than the viewport. Foundation 1.8 has no scrollbar composable. */
+@Composable
+private fun ScrollIndicator(
+    scrolledPx: Float,
+    viewportPx: Float,
+    contentPx: Float,
+    modifier: Modifier = Modifier,
+) {
+    if (viewportPx <= 0f || contentPx <= viewportPx + 1f) return
+    val color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+    Canvas(modifier) {
+        val thumb = (size.height * viewportPx / contentPx).coerceIn(28.dp.toPx(), size.height)
+        val travel = (size.height - thumb).coerceAtLeast(0f)
+        val maxScroll = (contentPx - viewportPx).coerceAtLeast(1f)
+        val top = travel * (scrolledPx / maxScroll).coerceIn(0f, 1f)
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(0f, top),
+            size = Size(size.width, thumb),
+            cornerRadius = CornerRadius(size.width / 2f, size.width / 2f),
+        )
+    }
+}
+
+@Composable
+private fun LazyListScrollBar(state: LazyListState, modifier: Modifier = Modifier) {
+    val info = state.layoutInfo
+    val visible = info.visibleItemsInfo
+    if (visible.isEmpty() || !(state.canScrollForward || state.canScrollBackward)) return
+    val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat().coerceAtLeast(1f)
+    val average = visible.sumOf { it.size }.toFloat() / visible.size
+    val content = average * info.totalItemsCount
+    val scrolled = (visible.first().index * average - visible.first().offset).coerceAtLeast(0f)
+    ScrollIndicator(scrolled, viewport, content, modifier)
+}
+
+@Composable
+private fun LazyGridScrollBar(state: LazyGridState, modifier: Modifier = Modifier) {
+    val info = state.layoutInfo
+    val visible = info.visibleItemsInfo
+    if (visible.isEmpty() || !(state.canScrollForward || state.canScrollBackward)) return
+    val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat().coerceAtLeast(1f)
+    val columns = (visible.maxOf { it.column } + 1).coerceAtLeast(1)
+    val rowHeight = visible
+        .groupBy { it.row }
+        .values
+        .map { row -> row.maxOf { it.size.height } }
+        .average()
+        .toFloat()
+        .coerceAtLeast(1f)
+    val rows = (info.totalItemsCount + columns - 1) / columns
+    val content = rowHeight * rows
+    val first = visible.minBy { it.row }
+    val scrolled = (first.row * rowHeight - first.offset.y).coerceAtLeast(0f)
+    ScrollIndicator(scrolled, viewport, content, modifier)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
