@@ -13,7 +13,7 @@
 | **applicationId** | `com.jacobrozell.puzzlebuddy` |
 | **minSdk / targetSdk** | 28 / 36 |
 | **Stack** | Kotlin · Compose · Hilt · Room v2 · DataStore · CameraX · ML Kit · Firebase |
-| **Active branch** | `dev` |
+| **Active branch** | `main` |
 | **iOS baseline** | `PuzzleBuddy` tag `1.1.0` (on iOS `main`, live 2026-11-02) |
 
 ## Verification
