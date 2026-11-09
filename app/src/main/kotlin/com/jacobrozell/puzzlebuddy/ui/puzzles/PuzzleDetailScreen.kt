@@ -210,6 +210,12 @@ fun PuzzleDetailScreen(
                             firstPane = {
                                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                     SummaryPanel(content.puzzle, viewModel::photoBytes)
+                                    PuzzleTimerCard(
+                                        puzzle = content.puzzle,
+                                        onStart = viewModel::startTimer,
+                                        onPause = viewModel::pauseTimer,
+                                        onReset = viewModel::resetTimer,
+                                    )
                                     ProgressPanel(
                                         puzzle = content.puzzle,
                                         onCommit = { percent -> viewModel.commitProgress(content.puzzle, percent) },
@@ -220,12 +226,6 @@ fun PuzzleDetailScreen(
                                         puzzle = content.puzzle,
                                         onSave = viewModel::saveCompletion,
                                         onDelete = viewModel::removeCompletion,
-                                    )
-                                    PuzzleTimerCard(
-                                        puzzle = content.puzzle,
-                                        onStart = viewModel::startTimer,
-                                        onPause = viewModel::pauseTimer,
-                                        onReset = viewModel::resetTimer,
                                     )
                                 }
                             },

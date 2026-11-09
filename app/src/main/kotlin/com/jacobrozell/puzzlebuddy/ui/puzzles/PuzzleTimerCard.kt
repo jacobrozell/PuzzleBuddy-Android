@@ -52,7 +52,7 @@ fun PuzzleTimerCard(
     onPause: () -> Unit,
     onReset: () -> Unit,
 ) {
-    if (puzzle.status != PuzzleStatus.IN_PROGRESS) return
+    if (puzzle.status != PuzzleStatus.IN_PROGRESS && puzzle.status != PuzzleStatus.TODO) return
 
     val brand = BrandTokens.colors
     val ticking = PuzzleTimerSemantics.isRunning(puzzle.timerRunningSince, Instant.now())
@@ -100,6 +100,13 @@ fun PuzzleTimerCard(
                         liveRegion = LiveRegionMode.Polite
                     },
                 )
+                if (puzzle.status == PuzzleStatus.TODO) {
+                    Text(
+                        "Starting the timer moves this puzzle to In progress.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = brand.textSecondary,
+                    )
+                }
                 val actions = @Composable {
                     Button(
                         onClick = { if (running) onPause() else onStart() },

@@ -684,9 +684,28 @@ class PuzzleRepositoryTest {
     }
 
     @Test
-    fun startIgnoredWhenNotInProgress() = runTest {
+    fun startOnToDoMovesItToInProgress() = runTest {
         val id = add(fixture("Shelf"))
+        val started = clock.now.minusSeconds(30)
+
+        repo.startTimer(id, now = started)
+
+        val loaded = load(id)
+        assertEquals(PuzzleStatus.IN_PROGRESS, loaded.status)
+        assertEquals(10, loaded.progressPercent)
+        assertEquals(started, loaded.startDate)
+        assertEquals(started, loaded.timerRunningSince)
+        assertEquals(1, events("puzzle_timer_started").size)
+        val change = events("puzzle_status_changed").single()
+        assertEquals(PuzzleStatus.TODO.raw, change.metadata["status_from"])
+        assertEquals(PuzzleStatus.IN_PROGRESS.raw, change.metadata["status_to"])
+    }
+
+    @Test
+    fun startIgnoredUnlessToDoOrInProgress() = runTest {
+        val id = add(fixture("Someday", status = PuzzleStatus.WISHLIST))
         repo.startTimer(id)
+        assertEquals(PuzzleStatus.WISHLIST, load(id).status)
         assertNull(load(id).timerRunningSince)
         assertTrue(events("puzzle_timer_started").isEmpty())
     }

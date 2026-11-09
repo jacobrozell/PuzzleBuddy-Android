@@ -264,10 +264,24 @@ class PuzzleRepository @Inject constructor(
     suspend fun startTimer(id: String, now: Instant = Instant.now(clock)) {
         val pausedOthers = mutableListOf<Long>()
         var started = false
+        var movedFrom: PuzzleStatus? = null
+        var pieces: Int? = null
         transactions.run {
             val stored = puzzleDao.findById(id)?.toDomain() ?: throw PuzzleStoreException.RecordNotFound()
-            if (stored.status != PuzzleStatus.IN_PROGRESS) return@run
-            if (PuzzleTimerSemantics.isRunning(stored.timerRunningSince, now)) return@run
+            // A picked To-Do puzzle is the one you are about to build. Starting its timer
+            // is what moves it onto the table.
+            val ready = if (stored.status == PuzzleStatus.TODO) {
+                stored.withStatusChange(stored.status, PuzzleStatus.IN_PROGRESS, now)
+            } else {
+                stored
+            }
+            if (ready.status != PuzzleStatus.IN_PROGRESS) return@run
+            if (PuzzleTimerSemantics.isRunning(ready.timerRunningSince, now)) return@run
+            if (ready.status != stored.status) {
+                puzzleDao.upsert(ready.toEntity())
+                movedFrom = stored.status
+                pieces = ready.pieces
+            }
             val others = puzzleDao.allOnce().map { it.toDomain() }
             for (otherId in PuzzleTimerSemantics.idsToPause(id, others)) {
                 val other = puzzleDao.findById(otherId)?.toDomain() ?: continue
@@ -275,11 +289,23 @@ class PuzzleRepository @Inject constructor(
                 puzzleDao.updateTimer(otherId, folded.timerAccumulatedSeconds, null)
                 pausedOthers += folded.timerAccumulatedSeconds
             }
-            val self = PuzzleTimerSemantics.paused(stored, now)
+            val self = PuzzleTimerSemantics.paused(ready, now)
             puzzleDao.updateTimer(id, self.timerAccumulatedSeconds, now.toEpochMilli())
             started = true
         }
         if (!started) return
+        if (movedFrom != null) {
+            logger.info(
+                LogCategory.PUZZLES,
+                eventName = "puzzle_status_changed",
+                message = "Puzzle status changed.",
+                metadata = PuzzleAnalyticsMetadata.statusChangedMetadata(
+                    from = movedFrom,
+                    to = PuzzleStatus.IN_PROGRESS,
+                    pieces = pieces,
+                ),
+            )
+        }
         pausedOthers.forEach { seconds ->
             logTimerPaused(PuzzleTimerSemantics.PauseReason.OTHER_STARTED, seconds)
         }
