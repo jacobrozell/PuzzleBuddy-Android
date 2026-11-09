@@ -1,10 +1,7 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
-import android.Manifest
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -79,6 +76,7 @@ import com.jacobrozell.puzzlebuddy.domain.surface.LegalCopy
 import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
 import com.jacobrozell.puzzlebuddy.domain.timer.PuzzleTimerSemantics
 import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScannerSheet
+import com.jacobrozell.puzzlebuddy.ui.barcode.rememberCameraPermissionRequest
 import com.jacobrozell.puzzlebuddy.ui.components.DateField
 import com.jacobrozell.puzzlebuddy.ui.components.FormSection
 import com.jacobrozell.puzzlebuddy.ui.components.HalfStarRatingRow
@@ -107,9 +105,7 @@ fun PuzzleFormScreen(
     val isNew = puzzleId == null
     var showScanner by remember { mutableStateOf(false) }
     var confirmDiscard by remember { mutableStateOf(false) }
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) showScanner = true
-    }
+    val requestCamera = rememberCameraPermissionRequest()
 
     fun close() {
         if (state.isDirty) confirmDiscard = true else onFinished()
@@ -206,7 +202,7 @@ fun PuzzleFormScreen(
                     FormBody(
                         state = state,
                         viewModel = viewModel,
-                        onScanBarcode = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                        onScanBarcode = { requestCamera { showScanner = true } },
                     )
                 }
             }

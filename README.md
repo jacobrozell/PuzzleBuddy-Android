@@ -76,8 +76,8 @@ Unit tests cover store logic, migrations, and domain helpers.
 
 ## Remaining (see PARITY.md)
 
-1. TalkBack audit, tablet pass, and photo/camera checks on a device
-2. Play Store release pipeline (`isPlayListingLive` stays off)
+1. Device pass and Play upload: [`docs/release-runbook.md`](docs/release-runbook.md)
+2. Play listing stays off (`isPlayListingLive` stays false until the store page exists)
 
 ---
 
@@ -89,6 +89,7 @@ Unit tests cover store logic, migrations, and domain helpers.
 | [`PARITY.md`](PARITY.md) | iOS ↔ Android feature scoreboard |
 | [`specs/README.md`](specs/README.md) | Two-layer spec index |
 | [`docs/agent-android-conversion-checklist.md`](docs/agent-android-conversion-checklist.md) | Conversion progress log |
+| [`docs/release-runbook.md`](docs/release-runbook.md) | Play 1.1.0 upload steps |
 
 ## Verify
 

@@ -1,9 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.puzzles
 
-import android.Manifest
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -118,6 +115,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.PuzzleMaterial
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleType
 import com.jacobrozell.puzzlebuddy.domain.surface.ProductSurface
 import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScanResultCard
+import com.jacobrozell.puzzlebuddy.ui.barcode.rememberCameraPermissionRequest
 import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScannerSheet
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingScanResult
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeScreen
@@ -149,19 +147,7 @@ fun PuzzleListScreen(
     var showShopping by remember { mutableStateOf(false) }
     var showTagSheet by remember { mutableStateOf(false) }
     var addMenuExpanded by remember { mutableStateOf(false) }
-    var pendingScanAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { granted ->
-        if (granted) pendingScanAction?.invoke()
-        pendingScanAction = null
-    }
-
-    fun requestCameraAndRun(action: () -> Unit) {
-        pendingScanAction = action
-        permissionLauncher.launch(Manifest.permission.CAMERA)
-    }
+    val requestCamera = rememberCameraPermissionRequest()
 
     state.scanAlert?.let { alert ->
         AlertDialog(
@@ -183,7 +169,7 @@ fun PuzzleListScreen(
                 onAddPuzzle = {},
                 onScanAnother = {
                     viewModel.dismissScanMatch()
-                    requestCameraAndRun { showScanner = true }
+                    requestCamera { showScanner = true }
                 },
             )
         }
@@ -269,7 +255,7 @@ fun PuzzleListScreen(
                         }
                     }
                     if (ProductSurface.isShoppingModeEnabled) {
-                        IconButton(onClick = { requestCameraAndRun { showShopping = true } }) {
+                        IconButton(onClick = { requestCamera { showShopping = true } }) {
                             Icon(Icons.Filled.QrCodeScanner, contentDescription = "Check duplicate")
                         }
                     }
@@ -315,7 +301,7 @@ fun PuzzleListScreen(
                             leadingIcon = { Icon(Icons.Filled.QrCodeScanner, contentDescription = null) },
                             onClick = {
                                 addMenuExpanded = false
-                                requestCameraAndRun { showScanner = true }
+                                requestCamera { showScanner = true }
                             },
                         )
                     }
