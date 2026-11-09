@@ -47,7 +47,7 @@ class StoreReviewPrompt @Inject constructor(
         logger.info(
             LogCategory.UI,
             eventName = "store_review_requested",
-            message = "Requested App Store review prompt.",
+            message = "Requested the Play review prompt.",
             metadata = mapOf("entry_point" to reason.entryPoint),
         )
         return true
@@ -59,7 +59,7 @@ class StoreReviewPrompt @Inject constructor(
         logger.info(
             LogCategory.UI,
             eventName = "store_review_link_opened",
-            message = "Opened App Store write-review page from Settings.",
+            message = "Opened the Play listing from Settings.",
             metadata = mapOf("entry_point" to Reason.SETTINGS_LINK.entryPoint),
         )
     }

@@ -43,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.jacobrozell.puzzlebuddy.domain.photo.MAX_PHOTOS
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
+import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhotoPick
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhotoSemantics
 import com.jacobrozell.puzzlebuddy.support.ImageCompression
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
@@ -87,17 +89,32 @@ fun PuzzlePhotoGalleryEditor(
     val sorted = PuzzlePhotoSemantics.photosInOrder(photos)
     val remaining = (MAX_PHOTOS - sorted.size).coerceAtLeast(0)
     var pendingRemoval by remember { mutableStateOf<PuzzlePhoto?>(null) }
+    var photoNotice by remember { mutableStateOf<String?>(null) }
 
     fun read(uri: Uri): ByteArray? =
         context.contentResolver.openInputStream(uri)?.use { it.readBytes() }?.let(ImageCompression::compressJpeg)
 
-    val pickOne = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let(::read)?.let { onAddPhotos(listOf(it)) }
+    fun deliver(uris: List<Uri>) {
+        val slots = remaining
+        val kept = uris.take(slots)
+        val added = kept.mapNotNull(::read)
+        if (added.isNotEmpty()) onAddPhotos(added)
+        photoNotice = PuzzlePhotoPick.overflowMessage(
+            slots = slots,
+            selected = uris.size,
+            unreadable = kept.size - added.size,
+        )
     }
-    val pickMany = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(maxItems = MAX_PHOTOS),
-    ) { uris ->
-        onAddPhotos(uris.take(remaining).mapNotNull(::read))
+
+    val pickOne = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) deliver(listOf(uri))
+    }
+    // Recreate the picker when the open slots change. Otherwise it keeps offering five photos
+    // after the puzzle already has some, and the extras used to disappear with no message.
+    val pickMany = key(remaining.coerceAtLeast(2)) {
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.PickMultipleVisualMedia(maxItems = remaining.coerceAtLeast(2)),
+        ) { uris -> deliver(uris) }
     }
     val cameraUri = remember {
         val file = File(context.cacheDir, "images/capture-${System.currentTimeMillis()}.jpg").apply { parentFile?.mkdirs() }
@@ -105,6 +122,17 @@ fun PuzzlePhotoGalleryEditor(
     }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) read(cameraUri)?.let { onAddPhotos(listOf(it)) }
+    }
+
+    photoNotice?.let { message ->
+        AlertDialog(
+            onDismissRequest = { photoNotice = null },
+            title = { Text("Some photos were not added") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { photoNotice = null }) { Text("OK") }
+            },
+        )
     }
 
     pendingRemoval?.let { photo ->
