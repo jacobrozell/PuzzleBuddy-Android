@@ -1,11 +1,13 @@
 package com.jacobrozell.puzzlebuddy
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
@@ -54,6 +56,10 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
         )
+        // Samsung draws a contrast scrim over a transparent navigation bar.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         setContent {
             var showSplash by remember { mutableStateOf(true) }
             var showOnboarding by remember { mutableStateOf(onboardingStore.shouldPresentOnLaunch) }
@@ -110,49 +116,52 @@ class MainActivity : ComponentActivity() {
                 when {
                     showSplash -> SplashScreen()
                     else -> {
+                        // One parent so onboarding is measured at full size above the shell.
                         // Hide the shell from TalkBack while onboarding covers it.
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .then(if (showOnboarding) Modifier.clearAndSetSemantics {} else Modifier),
-                        ) {
-                            PuzzleBuddyNavHost(
-                                onReplayOnboarding = { showOnboarding = true },
-                            )
-                        }
-                        if (showWhatsNew && !showOnboarding) {
-                            WhatsNewSheet(onDismiss = dismissWhatsNew)
-                        }
-                        if (showOnboarding) {
-                            OnboardingFlow(
-                                onSkipped = {
-                                    lifecycleScope.launch {
-                                        logger.info(
-                                            LogCategory.APP,
-                                            eventName = "onboarding_skipped",
-                                            message = "Onboarding skipped.",
-                                            metadata = mapOf("page_index" to "0"),
-                                        )
-                                        onboardingStore.markComplete()
-                                        markWhatsNewSeen()
-                                        userContext.syncOnboardingComplete(true)
-                                        showOnboarding = false
-                                    }
-                                },
-                                onFinished = {
-                                    lifecycleScope.launch {
-                                        onboardingStore.markComplete()
-                                        markWhatsNewSeen()
-                                        userContext.syncOnboardingComplete(true)
-                                        showOnboarding = false
-                                        logger.info(
-                                            LogCategory.APP,
-                                            eventName = "onboarding_completed",
-                                            message = "Onboarding finished.",
-                                        )
-                                    }
-                                },
-                            )
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(if (showOnboarding) Modifier.clearAndSetSemantics {} else Modifier),
+                            ) {
+                                PuzzleBuddyNavHost(
+                                    onReplayOnboarding = { showOnboarding = true },
+                                )
+                            }
+                            if (showWhatsNew && !showOnboarding) {
+                                WhatsNewSheet(onDismiss = dismissWhatsNew)
+                            }
+                            if (showOnboarding) {
+                                OnboardingFlow(
+                                    onSkipped = { pageIndex ->
+                                        lifecycleScope.launch {
+                                            logger.info(
+                                                LogCategory.APP,
+                                                eventName = "onboarding_skipped",
+                                                message = "Onboarding skipped.",
+                                                metadata = mapOf("page_index" to pageIndex.toString()),
+                                            )
+                                            onboardingStore.markComplete()
+                                            markWhatsNewSeen()
+                                            userContext.syncOnboardingComplete(true)
+                                            showOnboarding = false
+                                        }
+                                    },
+                                    onFinished = {
+                                        lifecycleScope.launch {
+                                            onboardingStore.markComplete()
+                                            markWhatsNewSeen()
+                                            userContext.syncOnboardingComplete(true)
+                                            showOnboarding = false
+                                            logger.info(
+                                                LogCategory.APP,
+                                                eventName = "onboarding_completed",
+                                                message = "Onboarding finished.",
+                                            )
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 }

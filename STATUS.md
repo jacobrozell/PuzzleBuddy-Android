@@ -2,7 +2,7 @@
 
 > **Parity tracker:** [`PARITY.md`](PARITY.md)  
 > **Plan:** [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md) (order of work) · [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md) (WP detail)  
-> **Last updated:** 2026-11-06
+> **Last updated:** 2026-11-09
 
 ## Summary
 
@@ -13,7 +13,7 @@
 | **applicationId** | `com.jacobrozell.puzzlebuddy` |
 | **minSdk / targetSdk** | 28 / 36 |
 | **Stack** | Kotlin · Compose · Hilt · Room v2 · DataStore · CameraX · ML Kit · Firebase |
-| **Active branch** | `claude/pensive-knuth-liq0g4` |
+| **Active branch** | `dev` |
 | **iOS baseline** | `PuzzleBuddy` tag `1.1.0` (on iOS `main`, live 2026-11-02) |
 
 ## Verification
