@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -39,6 +37,7 @@ import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleListPieceCountFilter
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleRandomPicker
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleTagCount
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.ui.designsystem.boundedSheetScroll
 import com.jacobrozell.puzzlebuddy.ui.components.FormSection
 import com.jacobrozell.puzzlebuddy.ui.components.PickerField
 import com.jacobrozell.puzzlebuddy.ui.components.SwitchRow
@@ -65,7 +64,7 @@ fun PickNextSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                .boundedSheetScroll()
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

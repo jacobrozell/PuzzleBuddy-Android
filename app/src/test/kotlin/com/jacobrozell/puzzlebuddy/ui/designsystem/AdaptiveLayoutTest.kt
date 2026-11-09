@@ -32,4 +32,12 @@ class AdaptiveLayoutTest {
         assertTrue(AdaptiveLayout.usesNavigationRail(600f))
         assertFalse(AdaptiveLayout.usesNavigationRail(599f))
     }
+
+    @Test
+    fun usesCompactHeightForShortWindows() {
+        assertTrue(AdaptiveLayout.usesCompactHeight(360f))
+        assertTrue(AdaptiveLayout.usesCompactHeight(479f))
+        assertFalse(AdaptiveLayout.usesCompactHeight(480f))
+        assertFalse(AdaptiveLayout.usesCompactHeight(800f))
+    }
 }

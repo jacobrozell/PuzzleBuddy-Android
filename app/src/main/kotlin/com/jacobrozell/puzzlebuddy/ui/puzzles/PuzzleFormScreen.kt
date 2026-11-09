@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -192,10 +195,12 @@ fun PuzzleFormScreen(
                     .fillMaxSize()
                     .padding(padding),
             ) {
+                val imeBottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .padding(bottom = imeBottom),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     FormBody(

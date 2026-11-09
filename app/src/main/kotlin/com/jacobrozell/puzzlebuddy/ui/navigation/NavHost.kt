@@ -3,8 +3,12 @@ package com.jacobrozell.puzzlebuddy.ui.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
@@ -162,7 +166,14 @@ fun PuzzleBuddyNavHost(onReplayOnboarding: () -> Unit = {}) {
         }
 
         if (useNavigationRail) {
-            Row(Modifier.fillMaxSize()) {
+            // The bottom-bar scaffold pads for the gesture bar and cutout. This row does not,
+            // so a landscape hole-punch or gesture bar covers the rail and the last control.
+            Row(
+                Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.safeDrawing)
+                    .consumeWindowInsets(WindowInsets.safeDrawing),
+            ) {
                 if (showRootNavigation) {
                     RootNavigationRail()
                 }

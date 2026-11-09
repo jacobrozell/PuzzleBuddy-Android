@@ -10,6 +10,9 @@ object AdaptiveLayout {
     val expandedWidthBreakpoint: Dp = 600.dp
     val listGridMinCellWidth: Dp = 360.dp
 
+    /** Phone landscape, fold cover, and split-screen windows. iOS treats this as compact height. */
+    val compactHeightBreakpoint: Dp = 480.dp
+
     fun usesWideDetailLayout(containerWidthDp: Float, containerHeightDp: Float): Boolean {
         val isLandscape = containerHeightDp < containerWidthDp && containerWidthDp >= 480f
         val isExpanded = containerWidthDp >= expandedWidthBreakpoint.value
@@ -18,6 +21,9 @@ object AdaptiveLayout {
 
     fun usesNavigationRail(containerWidthDp: Float): Boolean =
         containerWidthDp >= expandedWidthBreakpoint.value
+
+    fun usesCompactHeight(containerHeightDp: Float): Boolean =
+        containerHeightDp > 0f && containerHeightDp < compactHeightBreakpoint.value
 
     fun contentMaxWidth(containerWidthDp: Float, isLandscape: Boolean): Float {
         val minReadable = 680f

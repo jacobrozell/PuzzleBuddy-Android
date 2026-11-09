@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -323,23 +324,70 @@ fun PuzzleListScreen(
         },
     ) { padding ->
         ReadableContentWidth(modifier = Modifier.padding(padding).fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                storeNotice?.let { notice -> StoreNoticeBanner(notice) { viewModel.dismissStoreNotice(notice) } }
-                FilterHeader(
-                    state = state,
-                    viewModel = viewModel,
-                    onOpenTags = { showTagSheet = true },
-                )
-                // Remaining height only. fillMaxSize here starts below the header and runs
-                // off the bottom, which hides the Add puzzle button in landscape.
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val compact = AdaptiveLayout.usesCompactHeight(maxHeight.value)
+                val chrome: @Composable () -> Unit = {
+                    storeNotice?.let { notice -> StoreNoticeBanner(notice) { viewModel.dismissStoreNotice(notice) } }
+                    FilterHeader(
+                        state = state,
+                        viewModel = viewModel,
+                        onOpenTags = { showTagSheet = true },
+                    )
+                }
+                if (compact && state.displayedPuzzles.isEmpty()) {
+                    // Filters plus the empty state are taller than a phone in landscape.
+                    // One scroll keeps Add puzzle on screen and shows a scrollbar.
+                    val scroll = rememberScrollState()
+                    val viewport = maxHeight
+                    Box(Modifier.fillMaxSize()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(scroll)
+                                .heightIn(min = viewport)
+                                .padding(bottom = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            chrome()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                EmptyStateBody(state = state, onAddPuzzle = { onAddPuzzle(null) })
+                            }
+                        }
+                        ScrollIndicator(
+                            scrolledPx = scroll.value.toFloat(),
+                            viewportPx = scroll.viewportSize.toFloat(),
+                            contentPx = (scroll.viewportSize + scroll.maxValue).toFloat(),
+                            modifier = Modifier.align(Alignment.CenterEnd).collectionScrollBarPadding(),
+                        )
+                    }
+                } else if (compact) {
                     PuzzleCollection(
                         state = state,
                         repository = viewModel.repository,
                         onOpenPuzzle = onOpenPuzzle,
                         onRequestDelete = viewModel::requestDelete,
                         onAddPuzzle = { onAddPuzzle(null) },
+                        header = chrome,
                     )
+                } else {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        chrome()
+                        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                            PuzzleCollection(
+                                state = state,
+                                repository = viewModel.repository,
+                                onOpenPuzzle = onOpenPuzzle,
+                                onRequestDelete = viewModel::requestDelete,
+                                onAddPuzzle = { onAddPuzzle(null) },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -625,6 +673,7 @@ private fun PuzzleCollection(
     onOpenPuzzle: (String) -> Unit,
     onRequestDelete: (Puzzle) -> Unit,
     onAddPuzzle: () -> Unit,
+    header: (@Composable () -> Unit)? = null,
 ) {
     if (state.displayedPuzzles.isEmpty()) {
         EmptyState(state = state, onAddPuzzle = onAddPuzzle)
@@ -642,6 +691,9 @@ private fun PuzzleCollection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                if (header != null) {
+                    item(span = { GridItemSpan(maxLineSpan) }) { header() }
+                }
                 items(state.displayedPuzzles, key = { it.id }) { puzzle ->
                     PuzzleRow(
                         puzzle = puzzle,
@@ -664,6 +716,9 @@ private fun PuzzleCollection(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                if (header != null) {
+                    item { header() }
+                }
                 items(state.displayedPuzzles, key = { it.id }) { puzzle ->
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = { value ->
@@ -708,7 +763,6 @@ private fun PuzzleCollection(
 
 @Composable
 private fun EmptyState(state: PuzzleListUiState, onAddPuzzle: () -> Unit) {
-    val brand = BrandTokens.colors
     val scroll = rememberScrollState()
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -721,25 +775,7 @@ private fun EmptyState(state: PuzzleListUiState, onAddPuzzle: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         ) {
-            Icon(Icons.Filled.Extension, contentDescription = null, tint = BrandTokens.accent, modifier = Modifier.size(48.dp))
-            if (state.showsAddPuzzleAction) {
-                Text(
-                    PuzzleListEmptyState.NEW_COLLECTION_TITLE,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = brand.textPrimary,
-                    modifier = Modifier.semantics { heading() },
-                )
-            }
-            Text(
-                state.emptyMessage,
-                style = MaterialTheme.typography.bodyLarge,
-                color = brand.textSecondary,
-                textAlign = TextAlign.Center,
-            )
-            if (state.showsAddPuzzleAction) {
-                Button(onClick = onAddPuzzle, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add puzzle") }
-            }
+            EmptyStateBody(state = state, onAddPuzzle = onAddPuzzle)
         }
         ScrollIndicator(
             scrolledPx = scroll.value.toFloat(),
@@ -747,6 +783,30 @@ private fun EmptyState(state: PuzzleListUiState, onAddPuzzle: () -> Unit) {
             contentPx = (scroll.viewportSize + scroll.maxValue).toFloat(),
             modifier = Modifier.align(Alignment.CenterEnd).collectionScrollBarPadding(),
         )
+    }
+}
+
+@Composable
+private fun EmptyStateBody(state: PuzzleListUiState, onAddPuzzle: () -> Unit) {
+    val brand = BrandTokens.colors
+    Icon(Icons.Filled.Extension, contentDescription = null, tint = BrandTokens.accent, modifier = Modifier.size(48.dp))
+    if (state.showsAddPuzzleAction) {
+        Text(
+            PuzzleListEmptyState.NEW_COLLECTION_TITLE,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = brand.textPrimary,
+            modifier = Modifier.semantics { heading() },
+        )
+    }
+    Text(
+        state.emptyMessage,
+        style = MaterialTheme.typography.bodyLarge,
+        color = brand.textSecondary,
+        textAlign = TextAlign.Center,
+    )
+    if (state.showsAddPuzzleAction) {
+        Button(onClick = onAddPuzzle, modifier = Modifier.heightIn(min = 48.dp)) { Text("Add puzzle") }
     }
 }
 

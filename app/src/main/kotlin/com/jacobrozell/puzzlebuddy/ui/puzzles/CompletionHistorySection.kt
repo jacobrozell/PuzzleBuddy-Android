@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
@@ -55,6 +53,7 @@ import com.jacobrozell.puzzlebuddy.domain.completion.PuzzleCompletionHistoryCopy
 import com.jacobrozell.puzzlebuddy.domain.completion.PuzzleCompletionSemantics
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.domain.model.PuzzleStatus
+import com.jacobrozell.puzzlebuddy.ui.designsystem.boundedSheetScroll
 import com.jacobrozell.puzzlebuddy.ui.components.DateField
 import com.jacobrozell.puzzlebuddy.ui.components.FormSection
 import com.jacobrozell.puzzlebuddy.ui.components.SwitchRow
@@ -318,7 +317,7 @@ private fun CompletionEditSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                .boundedSheetScroll()
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

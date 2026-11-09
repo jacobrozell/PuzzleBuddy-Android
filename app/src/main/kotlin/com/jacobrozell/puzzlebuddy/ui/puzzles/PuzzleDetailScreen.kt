@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -296,9 +297,12 @@ private fun UndoCompletionBanner(onUndo: () -> Unit, onDismiss: () -> Unit) {
 
 @Composable
 private fun MissingPuzzle(modifier: Modifier, onBack: () -> Unit) {
+    BoxWithConstraints(modifier) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .heightIn(min = maxHeight)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
@@ -309,6 +313,7 @@ private fun MissingPuzzle(modifier: Modifier, onBack: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         TextButton(onClick = onBack) { Text("Back to puzzles") }
+    }
     }
 }
 
