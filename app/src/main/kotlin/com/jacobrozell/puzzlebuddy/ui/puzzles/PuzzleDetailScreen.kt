@@ -497,10 +497,10 @@ private fun DetailsPanel(puzzle: Puzzle) {
         puzzle.barcode?.takeIf { it.isNotEmpty() }?.let { DetailRow("Barcode", it, copyAnnouncement = "Barcode copied") }
         DetailRow(
             PuzzleDateSemantics.detailDateLabel(puzzle.status),
-            MediumDateLabel.format(PuzzleDateSemantics.detailStatusInstant(puzzle)),
+            MediumDateLabel.format(puzzle.completionDate),
         )
         PuzzleDateSemantics.progressDaysLabel(puzzle, now = now)?.let { DetailRow("Days puzzling", it) }
-        puzzle.startDate?.takeIf { PuzzleDateSemantics.showsSeparateStartDate(puzzle) }?.let {
+        puzzle.startDate?.takeIf { PuzzleDateSemantics.showsStartDatePicker(puzzle.status) }?.let {
             DetailRow("Started on", MediumDateLabel.format(it))
         }
         DetailRow("Missing pieces", if (puzzle.hasMissingPieces) "Yes" else "No")

@@ -3,6 +3,7 @@ package com.jacobrozell.puzzlebuddy.ui.puzzles
 import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,6 +49,7 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.PersonPin
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AccountTree
@@ -64,9 +67,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -119,6 +121,7 @@ import com.jacobrozell.puzzlebuddy.ui.barcode.rememberCameraPermissionRequest
 import com.jacobrozell.puzzlebuddy.ui.barcode.BarcodeScannerSheet
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingScanResult
 import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeScreen
+import com.jacobrozell.puzzlebuddy.ui.barcode.ShoppingModeViewModel
 import com.jacobrozell.puzzlebuddy.ui.components.BrandFilterChip
 import com.jacobrozell.puzzlebuddy.ui.components.ChipTone
 import com.jacobrozell.puzzlebuddy.ui.components.PickerField
@@ -138,6 +141,7 @@ fun PuzzleListScreen(
     onAddPuzzle: (String?) -> Unit,
     onQuickAdd: (QuickAddRequest) -> Unit,
     viewModel: PuzzleListViewModel = hiltViewModel(),
+    shoppingViewModel: ShoppingModeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -161,7 +165,7 @@ fun PuzzleListScreen(
     state.scanMatch?.let { match ->
         Dialog(onDismissRequest = viewModel::dismissScanMatch) {
             BarcodeScanResultCard(
-                result = ShoppingScanResult.Match(match),
+                result = ShoppingScanResult.Match(match, match.barcode.orEmpty()),
                 onOpenPuzzle = { puzzle ->
                     viewModel.dismissScanMatch()
                     onOpenPuzzle(puzzle.id)
@@ -221,25 +225,35 @@ fun PuzzleListScreen(
                 onBarcodeScanned = { raw ->
                     showScanner = false
                     viewModel.handleScannedBarcode(raw, context as? Activity, onQuickAdd = onQuickAdd)
+                    true
                 },
             )
         }
     }
     if (showShopping) {
         Dialog(
-            onDismissRequest = { showShopping = false },
+            onDismissRequest = {
+                showShopping = false
+                shoppingViewModel.beginSession()
+            },
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             ShoppingModeScreen(
-                onDismiss = { showShopping = false },
+                onDismiss = {
+                    showShopping = false
+                    shoppingViewModel.beginSession()
+                },
                 onOpenPuzzle = { id ->
                     showShopping = false
+                    shoppingViewModel.beginSession()
                     onOpenPuzzle(id)
                 },
                 onAddPuzzle = { barcode ->
                     showShopping = false
+                    shoppingViewModel.beginSession()
                     onAddPuzzle(barcode)
                 },
+                viewModel = shoppingViewModel,
             )
         }
     }
@@ -255,7 +269,12 @@ fun PuzzleListScreen(
                         }
                     }
                     if (ProductSurface.isShoppingModeEnabled) {
-                        IconButton(onClick = { requestCamera { showShopping = true } }) {
+                        IconButton(onClick = {
+                            requestCamera {
+                                shoppingViewModel.beginSession()
+                                showShopping = true
+                            }
+                        }) {
                             Icon(Icons.Filled.QrCodeScanner, contentDescription = "Check duplicate")
                         }
                     }
@@ -317,6 +336,7 @@ fun PuzzleListScreen(
                     FilterHeader(
                         state = state,
                         viewModel = viewModel,
+                        compact = compact,
                         onOpenTags = { showTagSheet = true },
                     )
                 }
@@ -442,44 +462,122 @@ private fun SortMenu(selected: PuzzleListSortOption, onSelect: (PuzzleListSortOp
 private fun FilterHeader(
     state: PuzzleListUiState,
     viewModel: PuzzleListViewModel,
+    compact: Boolean,
     onOpenTags: () -> Unit,
 ) {
     val filters = state.filters
     val brand = BrandTokens.colors
+    var showFilters by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Six segments truncate at large font scale; use a menu there, like iOS splitStatusMenuPicker.
-        if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) {
-            PickerField(
-                label = "Filter puzzles by status",
-                options = PuzzleListStatusFilter.entries,
-                selected = filters.status,
-                labelFor = { it.title },
-                onSelected = viewModel::setStatusFilter,
-            )
+        if (compact) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                StatusFilterControl(
+                    filters = filters,
+                    onSelect = viewModel::setStatusFilter,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = { showFilters = true },
+                    modifier = Modifier.semantics {
+                        contentDescription = "Search and filters"
+                        stateDescription = if (filters.hasSecondaryFilters || filters.hasActiveSearch) "Filters active" else "No filters"
+                    },
+                ) {
+                    Icon(
+                        Icons.Filled.Tune,
+                        contentDescription = null,
+                        tint = if (filters.hasSecondaryFilters || filters.hasActiveSearch) brand.accentText else brand.textPrimary,
+                    )
+                }
+            }
         } else {
-            SingleChoiceSegmentedButtonRow(
+            StatusFilterControl(filters = filters, onSelect = viewModel::setStatusFilter)
+            SearchAndFilterBody(state, viewModel, onOpenTags)
+        }
+    }
+    if (showFilters) {
+        ModalBottomSheet(onDismissRequest = { showFilters = false }) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = "Filter puzzles by status" },
+                    .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                PuzzleListStatusFilter.entries.forEachIndexed { index, filter ->
-                    SegmentedButton(
-                        selected = filters.status == filter,
-                        onClick = { viewModel.setStatusFilter(filter) },
-                        shape = SegmentedButtonDefaults.itemShape(index, PuzzleListStatusFilter.entries.size),
-                        icon = {},
-                    ) {
-                        Text(filter.title, maxLines = 1, style = MaterialTheme.typography.labelMedium)
-                    }
+                SearchAndFilterBody(state, viewModel, onOpenTags)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StatusFilterControl(
+    filters: PuzzleListFilters,
+    onSelect: (PuzzleListStatusFilter) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Six segments truncate at large font scale; use a menu there, like iOS splitStatusMenuPicker.
+    if (LocalDensity.current.fontScale >= LARGE_FONT_SCALE) {
+        PickerField(
+            label = "Filter puzzles by status",
+            options = PuzzleListStatusFilter.entries,
+            selected = filters.status,
+            labelFor = { it.title },
+            onSelected = onSelect,
+            modifier = modifier,
+        )
+    } else {
+        val outline = RoundedCornerShape(20.dp)
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(min = 40.dp)
+                .clip(outline)
+                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), outline)
+                .semantics { contentDescription = "Filter puzzles by status" },
+        ) {
+            PuzzleListStatusFilter.entries.forEach { filter ->
+                val selected = filters.status == filter
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 40.dp)
+                        .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                        .clickable { onSelect(filter) }
+                        .semantics {
+                            contentDescription = filter.title
+                            if (selected) stateDescription = "Selected"
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        filter.title,
+                        maxLines = 1,
+                        softWrap = false,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 2.dp, vertical = 8.dp),
+                    )
                 }
             }
         }
+    }
+}
 
+@Composable
+private fun SearchAndFilterBody(
+    state: PuzzleListUiState,
+    viewModel: PuzzleListViewModel,
+    onOpenTags: () -> Unit,
+) {
+    val filters = state.filters
+    val brand = BrandTokens.colors
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
             value = filters.searchText,
             onValueChange = { text -> viewModel.updateFilters { it.copy(searchText = text) } },

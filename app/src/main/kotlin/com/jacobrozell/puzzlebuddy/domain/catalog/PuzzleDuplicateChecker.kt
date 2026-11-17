@@ -9,10 +9,9 @@ object PuzzleDuplicateChecker {
         excludingId: String?,
         puzzles: List<Puzzle>,
     ): Puzzle? {
-        val normalized = BarcodeNormalizer.normalize(barcode) ?: return null
+        if (BarcodeNormalizer.normalize(barcode) == null) return null
         return puzzles.firstOrNull { puzzle ->
-            puzzle.id != excludingId &&
-                BarcodeNormalizer.normalize(puzzle.barcode)?.let { it == normalized } == true
+            puzzle.id != excludingId && BarcodeNormalizer.sameProduct(puzzle.barcode, barcode)
         }
     }
 }

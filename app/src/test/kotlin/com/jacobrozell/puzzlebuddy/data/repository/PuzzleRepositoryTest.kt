@@ -125,6 +125,15 @@ class PuzzleRepositoryTest {
     }
 
     @Test
+    fun upcAndEan13WithALeadingZeroAreTheSamePuzzle() = runTest {
+        add(fixture("Owned").copy(barcode = "036000291452"))
+        assertEquals("Owned", repo.findByBarcode("0036000291452")?.name)
+        assertThrows<PuzzleStoreException.DuplicateBarcode> {
+            repo.add(fixture("Copy").copy(barcode = "0036000291452"))
+        }
+    }
+
+    @Test
     fun updateRejectsDuplicateBarcode() = runTest {
         add(fixture("First").copy(barcode = "036000291452"))
         val second = add(fixture("Second").copy(barcode = "012345678905"))
@@ -684,25 +693,20 @@ class PuzzleRepositoryTest {
     }
 
     @Test
-    fun startOnToDoMovesItToInProgress() = runTest {
+    fun startOnToDoDoesNotMoveIt() = runTest {
         val id = add(fixture("Shelf"))
-        val started = clock.now.minusSeconds(30)
 
-        repo.startTimer(id, now = started)
+        repo.startTimer(id, now = clock.now.minusSeconds(30))
 
         val loaded = load(id)
-        assertEquals(PuzzleStatus.IN_PROGRESS, loaded.status)
-        assertEquals(10, loaded.progressPercent)
-        assertEquals(started, loaded.startDate)
-        assertEquals(started, loaded.timerRunningSince)
-        assertEquals(1, events("puzzle_timer_started").size)
-        val change = events("puzzle_status_changed").single()
-        assertEquals(PuzzleStatus.TODO.raw, change.metadata["status_from"])
-        assertEquals(PuzzleStatus.IN_PROGRESS.raw, change.metadata["status_to"])
+        assertEquals(PuzzleStatus.TODO, loaded.status)
+        assertNull(loaded.timerRunningSince)
+        assertTrue(events("puzzle_timer_started").isEmpty())
+        assertTrue(events("puzzle_status_changed").isEmpty())
     }
 
     @Test
-    fun startIgnoredUnlessToDoOrInProgress() = runTest {
+    fun startIgnoredUnlessInProgress() = runTest {
         val id = add(fixture("Someday", status = PuzzleStatus.WISHLIST))
         repo.startTimer(id)
         assertEquals(PuzzleStatus.WISHLIST, load(id).status)

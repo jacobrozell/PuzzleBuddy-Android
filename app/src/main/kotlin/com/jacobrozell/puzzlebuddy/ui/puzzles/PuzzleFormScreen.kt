@@ -145,6 +145,7 @@ fun PuzzleFormScreen(
                 onBarcodeScanned = { raw ->
                     showScanner = false
                     viewModel.applyScannedBarcode(raw, context as? Activity)
+                    true
                 },
             )
         }

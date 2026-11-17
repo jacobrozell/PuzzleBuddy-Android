@@ -32,12 +32,17 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,7 +51,7 @@ import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 
 sealed interface ShoppingScanResult {
-    data class Match(val puzzle: Puzzle) : ShoppingScanResult
+    data class Match(val puzzle: Puzzle, val barcode: String) : ShoppingScanResult
     data class NoMatch(val barcode: String) : ShoppingScanResult
 }
 
@@ -74,7 +79,7 @@ fun ShoppingModeScreen(
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.result == null) {
+            if (state.result == null && !state.busy) {
                 key(scannerKey) {
                     BarcodeScannerContent(
                         onBarcodeScanned = { raw -> viewModel.handleScan(raw, context as? Activity) },
@@ -82,18 +87,27 @@ fun ShoppingModeScreen(
                     )
                 }
             }
+            if (state.busy && state.result == null) {
+                state.pendingBarcode?.let { barcode ->
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text("Checking this barcode", style = MaterialTheme.typography.titleMedium)
+                        ScannedBarcode(barcode)
+                    }
+                }
+            }
             if (state.scansTotal > 0) {
-                val newCount = state.scansTotal - state.duplicatesFound
-                Text(
-                    "${state.scansTotal} scanned · ${state.duplicatesFound} duplicate${if (state.duplicatesFound == 1) "" else "s"} · $newCount new",
-                    style = MaterialTheme.typography.labelLarge,
+                ShoppingSessionBanner(
+                    scansTotal = state.scansTotal,
+                    duplicatesFound = state.duplicatesFound,
                     modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(12.dp)
-                        .semantics {
-                            contentDescription =
-                                "${state.scansTotal} barcodes scanned, ${state.duplicatesFound} duplicates, $newCount not in collection"
-                        },
+                        .align(Alignment.TopCenter)
+                        .padding(12.dp),
                 )
             }
             state.result?.let { result ->
@@ -145,6 +159,7 @@ fun BarcodeScanResultCard(
                     ResultHeading("You already own this", Icons.Filled.CheckCircle, brand.accentText)
                     Text(result.puzzle.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     result.puzzle.pieces?.let { Text("$it pieces", color = brand.textSecondary) }
+                    ScannedBarcode(result.barcode)
                     Button(onClick = { onOpenPuzzle(result.puzzle) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                         Text("Open puzzle")
                     }
@@ -152,9 +167,8 @@ fun BarcodeScanResultCard(
                 is ShoppingScanResult.NoMatch -> {
                     ResultHeading("Not in your collection", Icons.Filled.AddShoppingCart, brand.accentWarmText)
                     Text("No puzzle in your collection uses this barcode.", color = brand.textSecondary)
-                    Button(onClick = { onAddPuzzle(result.barcode) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                        Text("Add this puzzle")
-                    }
+                    ScannedBarcode(result.barcode)
+                    AddScannedPuzzleButton(result.barcode, onAddPuzzle)
                 }
             }
             onScanAnother?.let {
@@ -167,6 +181,52 @@ fun BarcodeScanResultCard(
                 ) { Text("Scan another") }
             }
         }
+    }
+}
+
+@Composable
+private fun ShoppingSessionBanner(scansTotal: Int, duplicatesFound: Int, modifier: Modifier = Modifier) {
+    val newCount = scansTotal - duplicatesFound
+    Text(
+        "$scansTotal scanned · $duplicatesFound duplicate${if (duplicatesFound == 1) "" else "s"} · $newCount new",
+        color = Color.White,
+        style = MaterialTheme.typography.labelLarge,
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.72f))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics {
+                contentDescription =
+                    "$scansTotal barcodes scanned, $duplicatesFound duplicates, $newCount not in collection"
+            },
+    )
+}
+
+@Composable
+private fun ScannedBarcode(barcode: String) {
+    Text(
+        barcode,
+        style = MaterialTheme.typography.titleMedium,
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(BrandTokens.colors.cardElevated)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .semantics { contentDescription = "Barcode $barcode" },
+    )
+}
+
+@Composable
+private fun AddScannedPuzzleButton(barcode: String, onAddPuzzle: (String) -> Unit) {
+    Button(
+        onClick = { onAddPuzzle(barcode) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .semantics { contentDescription = "Add puzzle with barcode $barcode" },
+    ) {
+        Text("Add this puzzle")
     }
 }
 
@@ -186,7 +246,7 @@ private fun ResultHeading(text: String, icon: androidx.compose.ui.graphics.vecto
 @Composable
 fun BarcodeScannerSheet(
     onDismiss: () -> Unit,
-    onBarcodeScanned: (String) -> Unit,
+    onBarcodeScanned: (String) -> Boolean,
 ) {
     Scaffold(
         topBar = {

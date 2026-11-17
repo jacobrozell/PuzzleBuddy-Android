@@ -7,7 +7,6 @@ import com.jacobrozell.puzzlebuddy.data.local.dao.PuzzlePhotoDao
 import com.jacobrozell.puzzlebuddy.data.local.toDomain
 import com.jacobrozell.puzzlebuddy.data.local.toEntity
 import com.jacobrozell.puzzlebuddy.data.photo.PhotoFileStore
-import com.jacobrozell.puzzlebuddy.domain.catalog.BarcodeValidator
 import com.jacobrozell.puzzlebuddy.domain.catalog.DemoDataCatalog
 import com.jacobrozell.puzzlebuddy.domain.catalog.PuzzleDuplicateChecker
 import com.jacobrozell.puzzlebuddy.domain.completion.CompletionUndoSemantics
@@ -264,24 +263,10 @@ class PuzzleRepository @Inject constructor(
     suspend fun startTimer(id: String, now: Instant = Instant.now(clock)) {
         val pausedOthers = mutableListOf<Long>()
         var started = false
-        var movedFrom: PuzzleStatus? = null
-        var pieces: Int? = null
         transactions.run {
             val stored = puzzleDao.findById(id)?.toDomain() ?: throw PuzzleStoreException.RecordNotFound()
-            // A picked To-Do puzzle is the one you are about to build. Starting its timer
-            // is what moves it onto the table.
-            val ready = if (stored.status == PuzzleStatus.TODO) {
-                stored.withStatusChange(stored.status, PuzzleStatus.IN_PROGRESS, now)
-            } else {
-                stored
-            }
-            if (ready.status != PuzzleStatus.IN_PROGRESS) return@run
-            if (PuzzleTimerSemantics.isRunning(ready.timerRunningSince, now)) return@run
-            if (ready.status != stored.status) {
-                puzzleDao.upsert(ready.toEntity())
-                movedFrom = stored.status
-                pieces = ready.pieces
-            }
+            if (stored.status != PuzzleStatus.IN_PROGRESS) return@run
+            if (PuzzleTimerSemantics.isRunning(stored.timerRunningSince, now)) return@run
             val others = puzzleDao.allOnce().map { it.toDomain() }
             for (otherId in PuzzleTimerSemantics.idsToPause(id, others)) {
                 val other = puzzleDao.findById(otherId)?.toDomain() ?: continue
@@ -289,23 +274,11 @@ class PuzzleRepository @Inject constructor(
                 puzzleDao.updateTimer(otherId, folded.timerAccumulatedSeconds, null)
                 pausedOthers += folded.timerAccumulatedSeconds
             }
-            val self = PuzzleTimerSemantics.paused(ready, now)
+            val self = PuzzleTimerSemantics.paused(stored, now)
             puzzleDao.updateTimer(id, self.timerAccumulatedSeconds, now.toEpochMilli())
             started = true
         }
         if (!started) return
-        if (movedFrom != null) {
-            logger.info(
-                LogCategory.PUZZLES,
-                eventName = "puzzle_status_changed",
-                message = "Puzzle status changed.",
-                metadata = PuzzleAnalyticsMetadata.statusChangedMetadata(
-                    from = movedFrom,
-                    to = PuzzleStatus.IN_PROGRESS,
-                    pieces = pieces,
-                ),
-            )
-        }
         pausedOthers.forEach { seconds ->
             logTimerPaused(PuzzleTimerSemantics.PauseReason.OTHER_STARTED, seconds)
         }
@@ -537,12 +510,8 @@ class PuzzleRepository @Inject constructor(
     /** Bytes of one saved photo, or null when it has no file yet or the file is gone. */
     suspend fun photoData(photo: PuzzlePhoto): ByteArray? = photo.fileName?.let { photoStore.read(it) }
 
-    suspend fun findByBarcode(barcode: String): Puzzle? {
-        val normalized = BarcodeValidator.normalizeOrNull(barcode) ?: return null
-        return allPuzzles().firstOrNull { puzzle ->
-            BarcodeValidator.normalizeOrNull(puzzle.barcode.orEmpty()) == normalized
-        }
-    }
+    suspend fun findByBarcode(barcode: String): Puzzle? =
+        allPuzzles().firstOrNull { puzzle -> BarcodeNormalizer.sameProduct(puzzle.barcode, barcode) }
 
     suspend fun isDuplicateBarcode(barcode: String, excludingId: String? = null): Puzzle? =
         PuzzleDuplicateChecker.findDuplicate(barcode, excludingId, allPuzzles())
@@ -597,7 +566,7 @@ class PuzzleRepository @Inject constructor(
     private suspend fun requireUniqueBarcode(puzzle: Puzzle, excludingId: String?) {
         val normalized = BarcodeNormalizer.normalize(puzzle.barcode) ?: return
         val match = puzzleDao.allOnce().firstOrNull { entity ->
-            entity.id != excludingId && BarcodeNormalizer.normalize(entity.barcode) == normalized
+            entity.id != excludingId && BarcodeNormalizer.sameProduct(entity.barcode, normalized)
         } ?: return
         throw PuzzleStoreException.DuplicateBarcode(match.name, normalized)
     }

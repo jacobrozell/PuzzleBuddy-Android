@@ -7,18 +7,6 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 object PuzzleDateSemantics {
-    /** Date shown on the status row. An in-progress puzzle uses the day it was started. */
-    fun detailStatusInstant(puzzle: Puzzle): Instant =
-        if (puzzle.status == PuzzleStatus.IN_PROGRESS) resolveStartDate(puzzle) ?: puzzle.completionDate
-        else puzzle.completionDate
-
-    /** A second start row only when it is a different day from the status row. */
-    fun showsSeparateStartDate(puzzle: Puzzle): Boolean {
-        val start = puzzle.startDate ?: return false
-        if (!showsStartDatePicker(puzzle.status)) return false
-        return dayCount(start, detailStatusInstant(puzzle)) != 0
-    }
-
     fun detailDateLabel(status: PuzzleStatus): String = when (status) {
         PuzzleStatus.WISHLIST -> "Added to wishlist"
         PuzzleStatus.TODO -> "Added"

@@ -46,6 +46,8 @@ import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Camera preview with ML Kit barcode scanning, a framing guide, the iOS guidance copy, and a flash
@@ -53,12 +55,13 @@ import java.util.concurrent.Executors
  */
 @Composable
 fun BarcodeScannerContent(
-    onBarcodeScanned: (String) -> Unit,
+    onBarcodeScanned: (String) -> Boolean,
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val view = LocalView.current
-    var lastScanned by remember { mutableStateOf<String?>(null) }
+    val accepted = remember { AtomicBoolean(false) }
+    val analysisRef = remember { AtomicReference<ImageAnalysis?>(null) }
     var camera by remember { mutableStateOf<Camera?>(null) }
     var torchOn by remember { mutableStateOf(false) }
     val executor = remember { Executors.newSingleThreadExecutor() }
@@ -86,26 +89,33 @@ fun BarcodeScannerContent(
                         .setTargetResolution(Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build()
+                    analysisRef.set(analysis)
                     analysis.setAnalyzer(executor) { imageProxy ->
                         val mediaImage = imageProxy.image
                         if (mediaImage == null) {
                             imageProxy.close()
                             return@setAnalyzer
                         }
+                        if (accepted.get()) {
+                            imageProxy.close()
+                            return@setAnalyzer
+                        }
                         scanner.process(InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees))
                             .addOnSuccessListener { barcodes ->
-                                val value = barcodes.firstOrNull { it.rawValue != null }?.rawValue
-                                if (value != null && value != lastScanned) {
-                                    lastScanned = value
-                                    view.performHapticFeedback(
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            HapticFeedbackConstants.CONFIRM
-                                        } else {
-                                            HapticFeedbackConstants.LONG_PRESS
-                                        },
-                                    )
-                                    onBarcodeScanned(value)
+                                if (!accepted.compareAndSet(false, true)) return@addOnSuccessListener
+                                val value = ProductBarcode.choose(barcodes.map { it.format to it.rawValue.orEmpty() })
+                                if (value == null || !onBarcodeScanned(value)) {
+                                    accepted.set(false)
+                                    return@addOnSuccessListener
                                 }
+                                analysisRef.get()?.clearAnalyzer()
+                                view.performHapticFeedback(
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        HapticFeedbackConstants.CONFIRM
+                                    } else {
+                                        HapticFeedbackConstants.LONG_PRESS
+                                    },
+                                )
                             }
                             .addOnCompleteListener { imageProxy.close() }
                     }

@@ -104,16 +104,15 @@ class IosParityDomainTest {
     }
 
     @Test
-    fun inProgressStatusRowUsesTheStartDate() {
+    fun statusRowUsesTheCompletionDateAndStartRowFollowsThePicker() {
         val active = puzzle(status = PuzzleStatus.IN_PROGRESS).copy(
             startDate = date("2026-11-14"),
-            completionDate = Instant.EPOCH,
+            completionDate = date("2026-11-17"),
         )
-        assertEquals(date("2026-11-14"), PuzzleDateSemantics.detailStatusInstant(active))
-        assertFalse(PuzzleDateSemantics.showsSeparateStartDate(active))
-        val finished = active.copy(status = PuzzleStatus.COMPLETED, completionDate = date("2026-11-17"))
-        assertEquals(date("2026-11-17"), PuzzleDateSemantics.detailStatusInstant(finished))
-        assertTrue(PuzzleDateSemantics.showsSeparateStartDate(finished))
+        assertEquals(date("2026-11-17"), active.completionDate)
+        assertTrue(PuzzleDateSemantics.showsStartDatePicker(active.status))
+        assertFalse(PuzzleDateSemantics.showsStartDatePicker(PuzzleStatus.TODO))
+        assertTrue(PuzzleDateSemantics.showsStartDatePicker(PuzzleStatus.COMPLETED))
     }
 
     @Test
