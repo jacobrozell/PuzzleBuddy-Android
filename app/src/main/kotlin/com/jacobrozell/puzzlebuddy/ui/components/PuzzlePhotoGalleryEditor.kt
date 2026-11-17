@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -65,6 +66,7 @@ import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhoto
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhotoPick
 import com.jacobrozell.puzzlebuddy.domain.photo.PuzzlePhotoSemantics
 import com.jacobrozell.puzzlebuddy.support.ImageCompression
+import com.jacobrozell.puzzlebuddy.ui.designsystem.AdaptiveLayout
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 import java.io.File
 
@@ -150,6 +152,13 @@ fun PuzzlePhotoGalleryEditor(
         )
     }
 
+    val compactHeight = AdaptiveLayout.usesCompactHeight(LocalConfiguration.current.screenHeightDp.toFloat())
+    val addPhotos = {
+        val request = PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        if (remaining == 1) pickOne.launch(request) else pickMany.launch(request)
+    }
+    val openCamera = { camera.launch(cameraUri) }
+
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -167,7 +176,7 @@ fun PuzzlePhotoGalleryEditor(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 120.dp)
+                    .heightIn(min = if (compactHeight) 72.dp else 120.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(brand.cardElevated)
                     .semantics(mergeDescendants = true) {
@@ -197,26 +206,39 @@ fun PuzzlePhotoGalleryEditor(
         }
 
         if (remaining > 0) {
-            OutlinedButton(
-                onClick = {
-                    val request = PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    if (remaining == 1) pickOne.launch(request) else pickMany.launch(request)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp),
-            ) {
-                Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
-                Text(if (remaining == 1) "  Add photo" else "  Add photos")
-            }
-            Button(
-                onClick = { camera.launch(cameraUri) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp),
-            ) {
-                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
-                Text("  Camera")
+            val addLabel = if (remaining == 1) "  Add photo" else "  Add photos"
+            if (compactHeight) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = addPhotos,
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    ) {
+                        Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
+                        Text(addLabel, maxLines = 1)
+                    }
+                    Button(
+                        onClick = openCamera,
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    ) {
+                        Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                        Text("  Camera", maxLines = 1)
+                    }
+                }
+            } else {
+                OutlinedButton(
+                    onClick = addPhotos,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                ) {
+                    Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
+                    Text(addLabel)
+                }
+                Button(
+                    onClick = openCamera,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                ) {
+                    Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                    Text("  Camera")
+                }
             }
         }
     }
