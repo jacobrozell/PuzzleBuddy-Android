@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jacobrozell.puzzlebuddy.domain.model.Puzzle
+import com.jacobrozell.puzzlebuddy.ui.components.PuzzleStatusPill
 import com.jacobrozell.puzzlebuddy.ui.theme.BrandTokens
 
 sealed interface ShoppingScanResult {
@@ -159,7 +160,7 @@ fun BarcodeScanResultCard(
                     ResultHeading("You already own this", Icons.Filled.CheckCircle, brand.accentText)
                     Text(result.puzzle.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     result.puzzle.pieces?.let { Text("$it pieces", color = brand.textSecondary) }
-                    ScannedBarcode(result.barcode)
+                    PuzzleStatusPill(result.puzzle.status)
                     Button(onClick = { onOpenPuzzle(result.puzzle) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                         Text("Open puzzle")
                     }
@@ -206,7 +207,7 @@ private fun ShoppingSessionBanner(scansTotal: Int, duplicatesFound: Int, modifie
 private fun ScannedBarcode(barcode: String) {
     Text(
         barcode,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.labelLarge,
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
