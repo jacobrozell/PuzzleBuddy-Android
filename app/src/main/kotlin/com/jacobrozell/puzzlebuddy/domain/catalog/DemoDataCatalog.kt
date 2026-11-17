@@ -337,7 +337,6 @@ object DemoDataCatalog {
         rating = rating,
         difficulty = difficulty,
         estimatedTimeSpent = null,
-        completionDate = Instant.EPOCH,
         isDemo = true,
         purchaseCurrencyCode = "USD",
         material = PuzzleMaterial.CARDBOARD,

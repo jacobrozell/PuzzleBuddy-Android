@@ -1,7 +1,6 @@
 package com.jacobrozell.puzzlebuddy.ui.stats
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -127,14 +126,12 @@ fun CollectionStatsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Stats") },
-                navigationIcon = {
+                actions = {
                     if (ProductSurface.isPickNextEnabled) {
                         IconButton(onClick = { showPickNext = true }) {
                             Icon(Icons.Filled.Casino, contentDescription = "Pick my next puzzle")
                         }
                     }
-                },
-                actions = {
                     PuzzleShareMenu(
                         entireCollection = puzzles,
                         visibleList = puzzles,
@@ -154,6 +151,7 @@ fun CollectionStatsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .navigationBarsPadding()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
@@ -183,7 +181,7 @@ fun CollectionStatsScreen(
                         )
                     }
                     HeroSection(stats, columns)
-                    HighlightStrip(stats, monthlyCounts.sum(), selectedYear.toString())
+                    HighlightStrip(stats, monthlyCounts.sum(), selectedYear.toString(), columns)
                     if (stats.completedCount > 0) {
                         YearActivitySection(
                             year = selectedYear,
@@ -296,42 +294,16 @@ private fun HeroSection(stats: CollectionStats, columns: Int) {
 }
 
 @Composable
-private fun HighlightStrip(stats: CollectionStats, yearTotal: Int, yearLabel: String) {
-    val chips = buildList {
-        add(yearLabel to yearTotal.toString())
-        if (stats.totalMinutesPuzzling > 0) add("At the table" to stats.formattedTotalHours)
-        stats.formattedAverageRating?.let { add("Avg. rating" to it) }
-        if (stats.inProgressCount > 0) add("On the table" to stats.inProgressCount.toString())
-        stats.formattedTotalSpend?.let { add("Collection value" to it) }
+private fun HighlightStrip(stats: CollectionStats, yearTotal: Int, yearLabel: String, columns: Int) {
+    val cards = buildList {
+        add(StatCardModel(yearTotal.toString(), yearLabel))
+        if (stats.totalMinutesPuzzling > 0) add(StatCardModel(stats.formattedTotalHours, "At the table"))
+        stats.formattedAverageRating?.let { add(StatCardModel(it, "Avg. rating")) }
+        if (stats.inProgressCount > 0) add(StatCardModel(stats.inProgressCount.toString(), "On the table"))
+        stats.formattedTotalSpend?.let { add(StatCardModel(it, "Collection value")) }
     }
-    if (chips.isEmpty()) return
-    val brand = BrandTokens.colors
-    Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        chips.forEach { (caption, value) ->
-            Card(
-                modifier = Modifier
-                    .widthIn(min = 104.dp)
-                    .clearAndSetSemantics { contentDescription = "$caption, $value" },
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = brand.card),
-            ) {
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        value,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = brand.textPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(caption, style = MaterialTheme.typography.labelMedium, color = brand.textSecondary, maxLines = 1)
-                }
-            }
-        }
-    }
+    if (cards.isEmpty()) return
+    StatGrid(cards, columns)
 }
 
 @Composable

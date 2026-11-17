@@ -121,7 +121,11 @@ fun CompletionHistorySection(
                         .clip(RoundedCornerShape(50))
                         .background(brand.cardElevated)
                         .clearAndSetSemantics {
-                            contentDescription = "${puzzle.timesCompleted} completions"
+                            contentDescription = if (puzzle.timesCompleted == 1) {
+                                "1 completion"
+                            } else {
+                                "${puzzle.timesCompleted} completions"
+                            }
                         }
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                 )

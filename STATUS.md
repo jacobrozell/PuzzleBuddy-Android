@@ -2,7 +2,7 @@
 
 > **Parity tracker:** [`PARITY.md`](PARITY.md)  
 > **Plan:** [`docs/implementation/1.1.0-catch-up.md`](docs/implementation/1.1.0-catch-up.md) (order of work) · [`docs/implementation/1.1.0-ios-parity-plan.md`](docs/implementation/1.1.0-ios-parity-plan.md) (WP detail)  
-> **Last updated:** 2026-11-09  
+> **Last updated:** 2026-11-17  
 > **Release steps:** [`docs/release-runbook.md`](docs/release-runbook.md)
 
 ## Summary
@@ -42,4 +42,4 @@ CI checks the allowlist against iOS tag `1.1.0`. Bump the `ref` in `.github/work
 ## Top remaining gaps
 
 1. Samsung pass in [`docs/release-runbook.md`](docs/release-runbook.md): camera allow and deny, photo pick, TalkBack, landscape, and a short window. Tablet is the same pass if you have one.
-2. Play listing stays off (`isPlayListingLive = false`) until the store page exists. Publish the privacy page, then follow the runbook. There is no Settings import/export screen. `puzzle_backup_restored` has no call site until a restore UI exists.
+2. Play listing stays off (`isPlayListingLive = false`) until the store page exists. The privacy page is live (November 2026, phone backup). Next is the Samsung pass in the runbook, then the internal track. There is no Settings import/export screen. `puzzle_backup_restored` has no call site until a restore UI exists.

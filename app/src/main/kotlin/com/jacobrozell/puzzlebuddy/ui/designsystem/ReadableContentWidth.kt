@@ -3,6 +3,7 @@ package com.jacobrozell.puzzlebuddy.ui.designsystem
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -33,7 +34,8 @@ fun ReadableContentWidth(
             modifier = Modifier
                 .widthIn(max = targetWidth)
                 .align(Alignment.TopCenter)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .fillMaxHeight(),
         ) {
             content()
         }

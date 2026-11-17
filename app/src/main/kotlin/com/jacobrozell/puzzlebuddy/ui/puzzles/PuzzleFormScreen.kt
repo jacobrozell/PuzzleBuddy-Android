@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -195,6 +196,7 @@ fun PuzzleFormScreen(
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding()
                         .padding(16.dp)
                         .padding(bottom = imeBottom),
                     verticalArrangement = Arrangement.spacedBy(20.dp),

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -203,6 +204,7 @@ fun PuzzleDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .verticalScroll(rememberScrollState())
+                            .navigationBarsPadding()
                             .padding(16.dp),
                     ) {
                         AdaptiveTwoPane(
@@ -493,9 +495,12 @@ private fun DetailsPanel(puzzle: Puzzle) {
         }
         if (puzzle.tags.isNotEmpty()) DetailRow("Tags", puzzle.tags.joinToString(", "))
         puzzle.barcode?.takeIf { it.isNotEmpty() }?.let { DetailRow("Barcode", it, copyAnnouncement = "Barcode copied") }
-        DetailRow(PuzzleDateSemantics.detailDateLabel(puzzle.status), MediumDateLabel.format(puzzle.completionDate))
+        DetailRow(
+            PuzzleDateSemantics.detailDateLabel(puzzle.status),
+            MediumDateLabel.format(PuzzleDateSemantics.detailStatusInstant(puzzle)),
+        )
         PuzzleDateSemantics.progressDaysLabel(puzzle, now = now)?.let { DetailRow("Days puzzling", it) }
-        puzzle.startDate?.takeIf { PuzzleDateSemantics.showsStartDatePicker(puzzle.status) }?.let {
+        puzzle.startDate?.takeIf { PuzzleDateSemantics.showsSeparateStartDate(puzzle) }?.let {
             DetailRow("Started on", MediumDateLabel.format(it))
         }
         DetailRow("Missing pieces", if (puzzle.hasMissingPieces) "Yes" else "No")

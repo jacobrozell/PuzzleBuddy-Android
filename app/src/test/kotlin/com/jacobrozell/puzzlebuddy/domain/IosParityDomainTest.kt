@@ -104,6 +104,19 @@ class IosParityDomainTest {
     }
 
     @Test
+    fun inProgressStatusRowUsesTheStartDate() {
+        val active = puzzle(status = PuzzleStatus.IN_PROGRESS).copy(
+            startDate = date("2026-11-14"),
+            completionDate = Instant.EPOCH,
+        )
+        assertEquals(date("2026-11-14"), PuzzleDateSemantics.detailStatusInstant(active))
+        assertFalse(PuzzleDateSemantics.showsSeparateStartDate(active))
+        val finished = active.copy(status = PuzzleStatus.COMPLETED, completionDate = date("2026-11-17"))
+        assertEquals(date("2026-11-17"), PuzzleDateSemantics.detailStatusInstant(finished))
+        assertTrue(PuzzleDateSemantics.showsSeparateStartDate(finished))
+    }
+
+    @Test
     fun priceClampCurrencyAndUnknownEnum() {
         assertEquals(12.5, PurchasePriceFormatting.parse("12.50"))
         assertNull(PurchasePriceFormatting.parse(""))
